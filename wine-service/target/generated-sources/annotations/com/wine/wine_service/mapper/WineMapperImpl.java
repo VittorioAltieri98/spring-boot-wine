@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2024-05-28T15:13:00+0200",
-    comments = "version: 1.4.2.Final, compiler: javac, environment: Java 21.0.3 (Oracle Corporation)"
+    date = "2024-05-28T16:28:40+0200",
+    comments = "version: 1.4.2.Final, compiler: javac, environment: Java 21.0.2 (Oracle Corporation)"
 )
 @Component
 public class WineMapperImpl implements WineMapper {

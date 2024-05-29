@@ -1,18 +1,30 @@
 version: "3.8"
 services:
-  postgres-wine:
+  postgres-wine-query:
     image: 'postgres:latest'
-    container_name: postgres-wine
+    container_name: postgres-wine-query
     environment:
-      POSTGRES_DB: wine-service
+      POSTGRES_DB: wine-query-service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
-      - wine-data:/var/lib/postgresql/data
+      - wine-query-data:/var/lib/postgresql/data
     restart: always
 
+  postgres-wine-command:
+    image: 'postgres:latest'
+    container_name: postgres-wine-command
+    environment:
+      POSTGRES_DB: wine-command-service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - wine-command-data:/var/lib/postgresql/data
+    restart: always
 
   postgres-ai-service:
     image: 'postgres:latest'
@@ -40,11 +52,13 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     depends_on:
-      - postgres-wine
+      - postgres-wine-query
+      - postgres-wine-command
       - postgres-ai-service
 
 volumes:
-  wine-data:
+  wine-query-data:
+  wine-command-data:
   ai-service-data:
   pgadmin-data:
 

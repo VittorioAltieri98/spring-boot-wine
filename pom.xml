@@ -17,10 +17,10 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>wine-service</module>
         <module>discovery-server</module>
         <module>ai-service</module>
         <module>wine-command-service</module>
+        <module>wine-query-service</module>
     </modules>
 
     <properties>

@@ -20,6 +20,7 @@
         <module>wine-service</module>
         <module>discovery-server</module>
         <module>ai-service</module>
+        <module>wine-command-service</module>
     </modules>
 
     <properties>

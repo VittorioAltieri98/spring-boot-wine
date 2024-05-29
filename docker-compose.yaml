@@ -15,18 +15,19 @@ services:
     restart: always
 
 
-  #postgres-ai-service:
-   # image: 'postgres:latest'
-    #container_name: postgres-ai-service
-      #environment:
-      #POSTGRES_DB: ai-service
-      #POSTGRES_USER: postgres
-    #POSTGRES_PASSWORD: postgres
-      #ports:
-    #- "5433:5432"
-      #volumes:
-    #- ai-service-data:/var/lib/postgresql/data
-    #restart: always
+  postgres-ai-service:
+    image: 'postgres:latest'
+    container_name: postgres-ai-service
+    environment:
+      POSTGRES_DB: ai-service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      PGPASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - ai-service-data:/var/lib/postgresql/data
+    restart: always
 
 
   pgadmin:
@@ -43,7 +44,7 @@ services:
 
 volumes:
   wine-data:
-  #ai-service-data:
+  ai-service-data:
   pgadmin-data:
 
 

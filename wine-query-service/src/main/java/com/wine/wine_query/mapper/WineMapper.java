@@ -10,5 +10,6 @@ import org.mapstruct.Mapper;
 public interface WineMapper {
 
     WineDTO wineToWineDTO(Wine wine);
+    Wine wineDTOtoWine(WineDTO wineDTO);
 
 }

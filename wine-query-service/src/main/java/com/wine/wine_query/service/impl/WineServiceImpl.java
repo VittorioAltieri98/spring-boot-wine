@@ -1,8 +1,7 @@
 package com.wine.wine_query.service.impl;
 
-
-
 import com.wine.wine_query.dto.WineDTO;
+import com.wine.wine_query.dto.WineEvent;
 import com.wine.wine_query.exception.WineNotFoundException;
 import com.wine.wine_query.mapper.WineMapper;
 import com.wine.wine_query.model.Wine;
@@ -10,6 +9,7 @@ import com.wine.wine_query.repository.WineRepository;
 import com.wine.wine_query.service.WineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,4 +63,48 @@ public class WineServiceImpl implements WineService {
         }
         return filteredWineDTO;
     }
+
+
+    @KafkaListener(topics = "wine-topic", groupId = "wineGroup")
+    public void processWineEvents(WineEvent wineEvent) {
+
+        WineDTO wineDTO = wineEvent.getWineDTO();
+        if (wineEvent.getEventType().equals("CreateWine")){
+            wineRepository.save(wineMapper.wineDTOtoWine(wineDTO));
+        }
+        if(wineEvent.getEventType().equals("UpdateWine")){
+            Wine findedWine = wineRepository.findById(wineDTO.getId()).get();
+
+            if(wineDTO.getWineName() != null){
+                findedWine.setWineName(wineDTO.getWineName());
+            }
+            if(wineDTO.getWineType() != null){
+                findedWine.setWineType(wineDTO.getWineType());
+            }
+            if(wineDTO.getGrape() != null){
+                findedWine.setGrape(wineDTO.getGrape());
+            }
+            if(wineDTO.getRegion() != null){
+                findedWine.setRegion(wineDTO.getRegion());
+            }
+            if(wineDTO.getDenomination() != null){
+                findedWine.setDenomination(wineDTO.getDenomination());
+            }
+
+            findedWine.setYear(wineDTO.getYear());
+
+            findedWine.setAlcoholPercentage(wineDTO.getAlcoholPercentage());
+
+            if(wineDTO.getWineDescription() != null){
+                findedWine.setWineDescription(wineDTO.getWineDescription());
+            }
+            if(wineDTO.getPurchaseLinks() != null){
+                findedWine.setPurchaseLinks(wineDTO.getPurchaseLinks());
+            }
+
+            wineRepository.save(findedWine);
+        }
+    }
+
+
 }

@@ -1,5 +1,6 @@
 package com.wine.microservice.dto;
 
+import com.wine.microservice.utils.EventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class WineEvent {
 
-    private String eventType;
+    private EventType eventType;
     private WineDTO wineDTO;
     private String wineLink;
 

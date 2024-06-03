@@ -10,7 +10,9 @@ import com.wine.microservice.mapper.WineMapper;
 import com.wine.microservice.model.Wine;
 import com.wine.microservice.repository.WineRepository;
 import com.wine.microservice.service.WineService;
+import com.wine.microservice.utils.EventType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,9 @@ public class WineServiceImpl implements WineService {
 
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Value("${kafka.wine.topic.name}")
+    private String wineTopicName;
 
     public WineDTO createWine(WineDTO wineDTO) throws WineAlreadyExistsException {
 
@@ -52,10 +57,10 @@ public class WineServiceImpl implements WineService {
         Wine savedWine = wineRepository.save(wine);
 
         WineEvent wineEvent = new WineEvent();
-        wineEvent.setEventType("CreateWine");
+        wineEvent.setEventType(EventType.CREATE_WINE);
         wineEvent.setWineDTO(wineMapper.wineToWineDTO(savedWine));
 
-        kafkaTemplate.send("wine-topic", wineEvent);
+        kafkaTemplate.send(wineTopicName, wineEvent);
 
         return wineMapper.wineToWineDTO(savedWine);
     }
@@ -91,10 +96,10 @@ public class WineServiceImpl implements WineService {
         Wine updatedWine = wineRepository.save(findWine);
 
         WineEvent wineEvent = new WineEvent();
-        wineEvent.setEventType("UpdateWine");
+        wineEvent.setEventType(EventType.UPDATE_WINE);
         wineEvent.setWineDTO(wineMapper.wineToWineDTO(updatedWine));
 
-        kafkaTemplate.send("wine-topic", wineEvent);
+        kafkaTemplate.send(wineTopicName, wineEvent);
 
         return wineMapper.wineToWineDTO(updatedWine);
     }
@@ -103,10 +108,10 @@ public class WineServiceImpl implements WineService {
         Wine deletedWine = wineRepository.findById(id).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + id));
 
         WineEvent wineEvent = new WineEvent();
-        wineEvent.setEventType("DeleteWine");
+        wineEvent.setEventType(EventType.DELETE_WINE);
         wineEvent.setWineDTO(wineMapper.wineToWineDTO(deletedWine));
 
-        kafkaTemplate.send("wine-topic", wineEvent);
+        kafkaTemplate.send(wineTopicName, wineEvent);
 
         wineRepository.delete(deletedWine);
     }
@@ -132,11 +137,11 @@ public class WineServiceImpl implements WineService {
         Wine savedWined = wineRepository.save(wine);
 
         WineEvent wineEvent = new WineEvent();
-        wineEvent.setEventType("AddLinkWine");
+        wineEvent.setEventType(EventType.ADD_LINK_WINE);
         wineEvent.setWineDTO(wineMapper.wineToWineDTO(savedWined));
         wineEvent.setWineLink(link);
 
-        kafkaTemplate.send("wine-topic", wineEvent);
+        kafkaTemplate.send(wineTopicName, wineEvent);
 
         return wineMapper.wineToWineDTO(savedWined);
     }

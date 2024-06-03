@@ -16,5 +16,4 @@ public interface WineService {
 
     public List<WineDTO> searchWines(String wineName, String wineType, String grape, String region, String denomination, int year, double alcoholPercentage);
 
-    public void processWineEvents(WineEvent wineEvent);
 }

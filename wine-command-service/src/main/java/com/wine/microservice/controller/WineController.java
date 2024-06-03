@@ -3,6 +3,7 @@ package com.wine.microservice.controller;
 
 
 import com.wine.microservice.dto.WineDTO;
+import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
 import com.wine.microservice.service.WineService;
@@ -37,7 +38,7 @@ public class WineController {
     }
 
     @PostMapping("/{id}/addLink")
-    public WineDTO addLinkToWine(@PathVariable Long id, @RequestBody String link) throws Exception {
+    public WineDTO addLinkToWine(@PathVariable Long id, @RequestBody String link) throws WineNotFoundException, LinkAlreadyExistsException {
         return wineService.addLinkToWine(id, link);
     }
 

@@ -19,4 +19,12 @@ public class ApplicationExceptionHandler {
         return errorMap;
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(LinkAlreadyExistsException.class)
+    public Map<String, String> handleLinkAlreadyExistsException(LinkAlreadyExistsException ex){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("Messaggio di errore", ex.getMessage());
+        return errorMap;
+    }
+
 }

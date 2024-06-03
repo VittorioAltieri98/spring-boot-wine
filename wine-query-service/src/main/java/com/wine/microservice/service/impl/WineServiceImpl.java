@@ -2,6 +2,7 @@ package com.wine.microservice.service.impl;
 
 import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.dto.WineEvent;
+import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
 import com.wine.microservice.mapper.WineMapper;
 import com.wine.microservice.model.Wine;
@@ -64,47 +65,47 @@ public class WineServiceImpl implements WineService {
         return filteredWineDTO;
     }
 
+    //Definire una classe WineEventsServiceHandler
+    //Implementare il metodo processWineEvents al suo interno
 
     @KafkaListener(topics = "wine-topic", groupId = "wineGroup")
     public void processWineEvents(WineEvent wineEvent) {
 
         WineDTO wineDTO = wineEvent.getWineDTO();
+
+        if(wineEvent.getEventType().equals("DeleteWine")) {
+            Long idWineDTO = wineDTO.getId();
+            Wine deletedWine = wineRepository.findById(idWineDTO).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + idWineDTO));
+            wineRepository.delete(deletedWine);
+        }
+        if(wineEvent.getEventType().equals("AddLinkWine")) {
+            Long idWineDTO = wineDTO.getId();
+            Wine wine = wineRepository.findById(idWineDTO).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + idWineDTO));
+            String trimmedLink = wineEvent.getWineLink().trim();
+
+            List<String> purchaseLinks = wine.getPurchaseLinks();
+
+            purchaseLinks.add(trimmedLink);
+            wineRepository.save(wine);
+        }
         if (wineEvent.getEventType().equals("CreateWine")){
             wineRepository.save(wineMapper.wineDTOtoWine(wineDTO));
         }
         if(wineEvent.getEventType().equals("UpdateWine")){
-            Wine findedWine = wineRepository.findById(wineDTO.getId()).get();
+            Long idWineDTO = wineDTO.getId();
+            Wine findedWine = wineRepository.findById(idWineDTO).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + idWineDTO));
 
-            if(wineDTO.getWineName() != null){
-                findedWine.setWineName(wineDTO.getWineName());
-            }
-            if(wineDTO.getWineType() != null){
-                findedWine.setWineType(wineDTO.getWineType());
-            }
-            if(wineDTO.getGrape() != null){
-                findedWine.setGrape(wineDTO.getGrape());
-            }
-            if(wineDTO.getRegion() != null){
-                findedWine.setRegion(wineDTO.getRegion());
-            }
-            if(wineDTO.getDenomination() != null){
-                findedWine.setDenomination(wineDTO.getDenomination());
-            }
-
+            findedWine.setWineName(wineDTO.getWineName());
+            findedWine.setWineType(wineDTO.getWineType());
+            findedWine.setGrape(wineDTO.getGrape());
+            findedWine.setRegion(wineDTO.getRegion());
+            findedWine.setDenomination(wineDTO.getDenomination());
             findedWine.setYear(wineDTO.getYear());
-
             findedWine.setAlcoholPercentage(wineDTO.getAlcoholPercentage());
-
-            if(wineDTO.getWineDescription() != null){
-                findedWine.setWineDescription(wineDTO.getWineDescription());
-            }
-            if(wineDTO.getPurchaseLinks() != null){
-                findedWine.setPurchaseLinks(wineDTO.getPurchaseLinks());
-            }
+            findedWine.setWineDescription(wineDTO.getWineDescription());
+            findedWine.setPurchaseLinks(wineDTO.getPurchaseLinks());
 
             wineRepository.save(findedWine);
         }
     }
-
-
 }

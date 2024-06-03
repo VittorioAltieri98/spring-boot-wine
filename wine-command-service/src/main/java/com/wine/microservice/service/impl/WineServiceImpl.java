@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,8 +118,12 @@ public class WineServiceImpl implements WineService {
         if (!isValidLink(trimmedLink)) {
             throw new IllegalArgumentException("Invalid link format: " + trimmedLink);
         }
-
         List<String> purchaseLinks = wine.getPurchaseLinks();
+
+        if (purchaseLinks == null) {
+            purchaseLinks = new ArrayList<>();
+            wine.setPurchaseLinks(purchaseLinks);
+        }
 
         if (purchaseLinks.contains(trimmedLink)) {
             throw new LinkAlreadyExistsException("Link already exists: " + trimmedLink);
@@ -129,6 +134,7 @@ public class WineServiceImpl implements WineService {
         WineEvent wineEvent = new WineEvent();
         wineEvent.setEventType("AddLinkWine");
         wineEvent.setWineDTO(wineMapper.wineToWineDTO(savedWined));
+        wineEvent.setWineLink(link);
 
         kafkaTemplate.send("wine-topic", wineEvent);
 

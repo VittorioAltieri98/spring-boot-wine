@@ -11,5 +11,6 @@ public class WineEvent {
 
     private String eventType;
     private WineDTO wineDTO;
+    private String wineLink;
 
 }

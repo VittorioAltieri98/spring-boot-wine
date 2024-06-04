@@ -24,6 +24,11 @@ public class AiController {
         return winePairingService.generatePairing(wineDTO);
     }
 
+    @GetMapping("/winePairings/{wineId}")
+    public WinePairingDTO getWinePairingByWineId (@PathVariable Long wineId)  throws Exception{
+        return winePairingService.getWinePairingByWineId(wineId);
+    }
+
     @GetMapping("/generate")
     public String generate(@RequestParam(value = "message") String message){
         return winePairingService.generateWinePairingInformation(message);

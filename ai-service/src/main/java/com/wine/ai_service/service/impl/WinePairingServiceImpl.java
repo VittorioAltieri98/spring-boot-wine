@@ -94,7 +94,15 @@ public class WinePairingServiceImpl implements WinePairingService {
         if(optional.isPresent()) {
             WinePairing winePairing = optional.get();
             return winePairingMapper.winePairingToWinePairingDTO(winePairing);
-        }else throw new Exception("WinePairing not found with id " + id);
+        } else throw new Exception("WinePairing not found with id " + id);
+    }
+
+    public WinePairingDTO getWinePairingByWineId(Long wineId) throws Exception{
+        Optional<WinePairing> optional = winePairingRepository.findByWineId(wineId);
+        if(optional.isPresent()){
+            WinePairing winePairing = optional.get();
+            return winePairingMapper.winePairingToWinePairingDTO(winePairing);
+        } else throw new Exception("WinePairing not found with id " + wineId);
     }
 
     public void saveWinePair(WinePairing winePairing) {

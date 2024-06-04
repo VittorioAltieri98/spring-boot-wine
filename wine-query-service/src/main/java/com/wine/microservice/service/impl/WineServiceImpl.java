@@ -1,7 +1,10 @@
 package com.wine.microservice.service.impl;
 
+import com.wine.microservice.client.WinePairingServiceClient;
 import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.dto.WineEvent;
+import com.wine.microservice.dto.WinePairingDTO;
+import com.wine.microservice.dto.WineResponseDTO;
 import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
 import com.wine.microservice.mapper.WineMapper;
@@ -25,6 +28,9 @@ public class WineServiceImpl implements WineService {
 
     @Autowired
     private WineRepository wineRepository;
+
+    @Autowired
+    private WinePairingServiceClient winePairingServiceClient;
 
     @Autowired
     private WineMapper wineMapper;
@@ -63,5 +69,27 @@ public class WineServiceImpl implements WineService {
             filteredWineDTO.add(wineDTO);
         }
         return filteredWineDTO;
+    }
+
+    public WineResponseDTO getWineDetailsWithPairings(Long wineId) throws WineNotFoundException{
+        Wine wine = wineRepository.findById(wineId).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + wineId));
+        WinePairingDTO winePairingDTO = winePairingServiceClient.getWinePairingByWineId(wineId);
+
+        WineResponseDTO response = WineResponseDTO.builder()
+                .id(wine.getId())
+                .wineName(wine.getWineName())
+                .wineType(wine.getWineType())
+                .grape(wine.getGrape())
+                .region(wine.getRegion())
+                .denomination(wine.getDenomination())
+                .year(wine.getYear())
+                .alcoholPercentage(wine.getAlcoholPercentage())
+                .wineDescription(wine.getWineDescription())
+                .purchaseLinks(wine.getPurchaseLinks())
+                .foodPairings(winePairingDTO.getFoodPairings())
+                .foodsNameAndDescriptionOfWhyThePairingIsRecommended(winePairingDTO.getFoodsNameAndDescriptionOfWhyThePairingIsRecommended())
+                .build();
+
+        return response;
     }
 }

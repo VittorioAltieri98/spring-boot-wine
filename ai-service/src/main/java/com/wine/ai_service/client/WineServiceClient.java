@@ -12,7 +12,7 @@ public class WineServiceClient {
     private RestTemplate restTemplate;
 
     public WineDTO getWineById(Long wineId){
-        String wineServiceUrl = "http://localhost:8081/wine/" + wineId;
+        String wineServiceUrl = "http://localhost:8084/wine/" + wineId;
         return restTemplate.getForObject(wineServiceUrl, WineDTO.class);
     }
 

@@ -2,6 +2,7 @@ package com.wine.microservice.controller;
 
 
 import com.wine.microservice.dto.WineDTO;
+import com.wine.microservice.dto.WineResponseDTO;
 import com.wine.microservice.exception.WineNotFoundException;
 import com.wine.microservice.service.WineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,11 @@ public class WineController {
                                      @RequestParam(required = false, defaultValue = "0") int year,
                                      @RequestParam(required = false, defaultValue = "0.0") double alcoholPercentage) {
         return wineService.searchWines(wineName, wineType, grape, region, denomination, year, alcoholPercentage);
+    }
+
+    @GetMapping("/{id}/pairings")
+    public WineResponseDTO getWineDetailsWithPairings(@PathVariable Long id){
+        return wineService.getWineDetailsWithPairings(id);
     }
 
 }

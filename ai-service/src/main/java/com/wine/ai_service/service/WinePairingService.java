@@ -13,5 +13,6 @@ public interface WinePairingService {
     public String getWineInfoBasedOnFilters(String wineType, String region);
     public WineInfo obtainWineInfoBasedOnFilters(String wineType, String region);
     public WinePairingDTO getWinePairingById(Long id) throws Exception;
+    public WinePairingDTO getWinePairingByWineId(Long wineId) throws Exception;
     public void saveWinePair(WinePairing winePairing);
 }

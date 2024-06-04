@@ -38,8 +38,8 @@ public class WineController {
     }
 
     @PostMapping("/{id}/addLink")
-    public WineDTO addLinkToWine(@PathVariable Long id, @RequestBody String link) throws WineNotFoundException, LinkAlreadyExistsException {
-        return wineService.addLinkToWine(id, link);
+    public ResponseEntity<WineDTO> addLinkToWine(@PathVariable Long id, @RequestBody String link) throws WineNotFoundException, LinkAlreadyExistsException {
+        return new ResponseEntity<>(wineService.addLinkToWine(id, link), HttpStatus.CREATED);
     }
 
 }

@@ -4,8 +4,11 @@ import com.wine.ai_service.client.WineServiceClient;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.service.WinePairingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,40 +18,37 @@ public class AiController {
     @Autowired
     private WinePairingService winePairingService;
 
-    @Autowired
-    private WineServiceClient wineServiceClient;
 
     @GetMapping("/{id}/pairing")
-    public WinePairingDTO pairing(@PathVariable Long id) throws Exception {
-        WineDTO wineDTO = wineServiceClient.getWineById(id);
-        return winePairingService.generatePairing(wineDTO);
+    public ResponseEntity<WinePairingDTO> pairing(@PathVariable Long id) {
+        return new ResponseEntity<>(winePairingService.generateWinePairing(id), HttpStatus.OK);
     }
 
-    @GetMapping("/winePairings/{wineId}")
-    public WinePairingDTO getWinePairingByWineId (@PathVariable Long wineId)  throws Exception{
-        return winePairingService.getWinePairingByWineId(wineId);
+    @GetMapping("/winePairing/by-wine-id/{wineId}")
+    public ResponseEntity<WinePairingDTO> getWinePairingByWineId(@PathVariable Long wineId) throws WinePairingNotFoundException {
+        return new ResponseEntity<>(winePairingService.getWinePairingByWineId(wineId), HttpStatus.OK);
     }
 
-    @GetMapping("/generate")
-    public String generate(@RequestParam(value = "message") String message){
-        return winePairingService.generateWinePairingInformation(message);
+    @GetMapping("/generate/food-message")
+    public ResponseEntity<String> generatePairingsByFoodMessage(@RequestParam(value = "message") String message){
+        return new ResponseEntity<>(winePairingService.generatePairingsByFoodMessage(message), HttpStatus.OK);
     }
 
-    @GetMapping("/winePairing/{id}")
-    public WinePairingDTO getWinePairingById(@PathVariable Long id) throws Exception {
-        return winePairingService.getWinePairingById(id);
+    @GetMapping("/winePairing/by-id/{id}")
+    public ResponseEntity<WinePairingDTO> getWinePairingById(@PathVariable Long id) throws WinePairingNotFoundException {
+        return new ResponseEntity<>(winePairingService.getWinePairingById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/generate/with-filter")
-    public String generateWineInfoWithFilters(@RequestParam(value = "wineType") String wineType,
+    @GetMapping("/generate/info/with-filter")
+    public ResponseEntity<String> generateInfoWithFilters(@RequestParam(value = "wineType") String wineType,
                                               @RequestParam(value = "region") String region) {
-        return winePairingService.getWineInfoBasedOnFilters(wineType, region);
+        return new ResponseEntity<>(winePairingService.generateInfoWithFilters(wineType, region), HttpStatus.OK);
     }
 
-    @GetMapping("/generateInfo/with-filter")
-    public WineInfo obtainWineInfoWithFilters(@RequestParam(value = "wineType") String wineType,
+    @GetMapping("/generate/wine-info/with-filter")
+    public ResponseEntity<WineInfo> generateWineInfoWithFilters(@RequestParam(value = "wineType") String wineType,
                                               @RequestParam(value = "region") String region) {
-        return winePairingService.obtainWineInfoBasedOnFilters(wineType, region);
+        return new ResponseEntity<>(winePairingService.generateWineInfoWithFilters(wineType, region), HttpStatus.OK);
     }
 
 }

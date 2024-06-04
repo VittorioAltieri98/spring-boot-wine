@@ -1,8 +1,10 @@
 package com.wine.ai_service.service.impl;
 
+import com.wine.ai_service.client.WineServiceClient;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.mapper.WinePairingMapper;
 import com.wine.ai_service.model.WinePairing;
 import com.wine.ai_service.repository.WinePairingRepository;
@@ -32,7 +34,16 @@ public class WinePairingServiceImpl implements WinePairingService {
     private VertexAiGeminiChatClient vertexAiGeminiChatClient;
 
     @Autowired
+    private WineServiceClient wineServiceClient;
+
+    @Autowired
     private WinePairingMapper winePairingMapper;
+
+
+    public WinePairingDTO generateWinePairing(Long id) {
+        WineDTO wineDTO = wineServiceClient.getWineById(id);
+        return generatePairing(wineDTO);
+    }
 
     public WinePairingDTO generatePairing(WineDTO wineDTO) {
         BeanOutputParser<WinePairing> outputParser = new BeanOutputParser<>(WinePairing.class);
@@ -49,7 +60,7 @@ public class WinePairingServiceImpl implements WinePairingService {
         return winePairingMapper.winePairingToWinePairingDTO(savedWinePairing);
     }
 
-    public String generateWinePairingInformation(String message){
+    public String generatePairingsByFoodMessage(String message){
 
         SystemMessage systemMessage = new SystemMessage("""
                 Devi occuparti di rispondere alle richieste che ti vengono fatte riguardo ad abbinamenti di vini ad un cibo.
@@ -63,7 +74,7 @@ public class WinePairingServiceImpl implements WinePairingService {
 
     //Farsi generare dall'IA un vino in base ai parametri scelti dall'utente
     //I parametri possono essere il colore del vino, la regione, etc..
-    public String getWineInfoBasedOnFilters(String wineType, String region) {
+    public String generateInfoWithFilters(String wineType, String region) {
         String userMessage = """
                 Generami le informazioni di un vino di colore {wineType} della regione {region} che esiste.
                 """;
@@ -74,7 +85,7 @@ public class WinePairingServiceImpl implements WinePairingService {
         return chatResponse.getResult().getOutput().getContent();
     }
 
-    public WineInfo obtainWineInfoBasedOnFilters(String wineType, String region) {
+    public WineInfo generateWineInfoWithFilters(String wineType, String region) {
         BeanOutputParser<WineInfo> outputParser = new BeanOutputParser<>(WineInfo.class);
 
         String userMessage = """
@@ -89,20 +100,20 @@ public class WinePairingServiceImpl implements WinePairingService {
         return wineInfo;
     }
 
-    public WinePairingDTO getWinePairingById(Long id) throws Exception {
+    public WinePairingDTO getWinePairingById(Long id) throws WinePairingNotFoundException {
         Optional<WinePairing> optional = winePairingRepository.findById(id);
         if(optional.isPresent()) {
             WinePairing winePairing = optional.get();
             return winePairingMapper.winePairingToWinePairingDTO(winePairing);
-        } else throw new Exception("WinePairing not found with id " + id);
+        } else throw new WinePairingNotFoundException("WinePairing not found with id " + id);
     }
 
-    public WinePairingDTO getWinePairingByWineId(Long wineId) throws Exception{
+    public WinePairingDTO getWinePairingByWineId(Long wineId) throws WinePairingNotFoundException{
         Optional<WinePairing> optional = winePairingRepository.findByWineId(wineId);
         if(optional.isPresent()){
             WinePairing winePairing = optional.get();
             return winePairingMapper.winePairingToWinePairingDTO(winePairing);
-        } else throw new Exception("WinePairing not found with id " + wineId);
+        } else throw new WinePairingNotFoundException("WinePairing not found with id " + wineId);
     }
 
     public void saveWinePair(WinePairing winePairing) {

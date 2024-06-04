@@ -26,24 +26,26 @@ public class WineController {
     }
 
     @GetMapping("/all")
-    public List<WineDTO> getAllWines(){
-        return wineService.getAllWines();
+    public ResponseEntity<List<WineDTO>> getAllWines(){
+        return new ResponseEntity<>(wineService.getAllWines(), HttpStatus.OK);
     }
 
     @GetMapping("/search")
-    public List<WineDTO> searchWines(@RequestParam(required = false) String wineName,
+    public ResponseEntity<List<WineDTO>> searchWines(@RequestParam(required = false) String wineName,
                                      @RequestParam(required = false) String wineType,
                                      @RequestParam(required = false) String grape,
                                      @RequestParam(required = false) String region,
                                      @RequestParam(required = false) String denomination,
                                      @RequestParam(required = false, defaultValue = "0") int year,
                                      @RequestParam(required = false, defaultValue = "0.0") double alcoholPercentage) {
-        return wineService.searchWines(wineName, wineType, grape, region, denomination, year, alcoholPercentage);
+        List<WineDTO> response = wineService.searchWines(wineName, wineType, grape, region, denomination, year, alcoholPercentage);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
+
     @GetMapping("/{id}/pairings")
-    public WineResponseDTO getWineDetailsWithPairings(@PathVariable Long id){
-        return wineService.getWineDetailsWithPairings(id);
+    public ResponseEntity<WineResponseDTO> getWineDetailsWithPairings(@PathVariable Long id){
+        return new ResponseEntity<>(wineService.getWineDetailsWithPairings(id), HttpStatus.OK);
     }
 
 }

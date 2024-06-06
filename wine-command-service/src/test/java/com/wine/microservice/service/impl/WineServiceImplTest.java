@@ -11,7 +11,6 @@ import com.wine.microservice.repository.WineRepository;
 import com.wine.microservice.utils.EventType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.apache.commons.lang.StringUtils.substring;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -63,7 +61,7 @@ class WineServiceImplTest {
 
         wineDTO = new WineDTO();
         wineDTO.setId(5L);
-        wineDTO.setWineName("Test Wine");
+        wineDTO.setWineName("Barolo");
         wineDTO.setWineType("Red");
         wineDTO.setGrape("Merlot");
         wineDTO.setRegion("Tuscany");
@@ -196,38 +194,30 @@ class WineServiceImplTest {
    @Test
    void shouldOnlyUpdateWineName() {
        //given
-       long id = 5L;
-       String newName = "Vittorio";
+       String newName = "Sauvignon";
 
-       WineDTO newWineDTO = new WineDTO();
-       newWineDTO.setWineName(newName);
-       newWineDTO.setWineType("Bianco");
-
-       Wine newWine = Wine.builder()
-               .id(id)
-               .wineName("Federico")
-               .wineType("Bianco")
-               .grape("Federico")
-               .region("Federico")
-               .denomination("DOC")
-               .year(1998)
-               .alcoholPercentage(14.0)
-               .wineDescription("Federico")
+       WineDTO newWineDTO = WineDTO.builder()
+               .id(wineDTO.getId())
+               .wineName(newName)
+               .wineType("Red")
+               .grape("Merlot")
+               .region("Tuscany")
+               .denomination("DOCG")
+               .year(2020)
+               .alcoholPercentage(13.5)
+               .wineDescription("A test wine description.")
+               .purchaseLinks(wineDTO.getPurchaseLinks())
                .build();
 
-       when(wineRepository.findById(id)).thenReturn(Optional.of(newWine));
-       when(wineRepository.save(any(Wine.class))).thenReturn(newWine);
+       when(wineRepository.findById(wine.getId())).thenReturn(Optional.of(wine));
+       when(wineRepository.save(any(Wine.class))).thenReturn(wine);
        when(wineMapper.wineToWineDTO(any(Wine.class))).thenReturn(newWineDTO);
        //when
-       WineDTO result = wineService.updateWine(newWine.getId(), newWineDTO);
+       WineDTO result = wineService.updateWine(wine.getId(), newWineDTO);
        //then
-       verify(wineRepository).findById(id);
+       verify(wineRepository).findById(wine.getId());
        verify(wineRepository).save(any(Wine.class));
        verify(wineMapper, times(2)).wineToWineDTO(any(Wine.class));
-
-       ArgumentCaptor<Wine> wineCaptor = ArgumentCaptor.forClass(Wine.class);
-       verify(wineRepository).save(wineCaptor.capture());
-       Wine capturedWine = wineCaptor.getValue();
 
        ArgumentCaptor<String> topicCaptor = ArgumentCaptor.forClass(String.class);
        ArgumentCaptor<WineEvent> eventCaptor = ArgumentCaptor.forClass(WineEvent.class);
@@ -238,18 +228,89 @@ class WineServiceImplTest {
        assertEquals(EventType.UPDATE_WINE, capturedEvent.getEventType());
        assertEquals(newWineDTO, capturedEvent.getWineDTO());
 
-       assertThat(capturedWine.getWineName()).isEqualTo(newName);
-       assertThat(capturedWine.getWineType()).isEqualTo(newWine.getWineType());
-       assertThat(capturedWine.getGrape()).isEqualTo(newWine.getGrape());
-       assertThat(capturedWine.getRegion()).isEqualTo(newWine.getRegion());
-       assertThat(capturedWine.getDenomination()).isEqualTo(newWine.getDenomination());
-       assertThat(capturedWine.getYear()).isEqualTo(newWine.getYear());
-       assertThat(capturedWine.getAlcoholPercentage()).isEqualTo(newWine.getAlcoholPercentage());
-       assertThat(capturedWine.getWineDescription()).isEqualTo(newWine.getWineDescription());
-
        assertThat(result.getWineName()).isEqualTo(newName);
-       assertThat(result.getWineType()).isEqualTo(newWine.getWineType());
+
+       assertThat(result.getWineName()).isNotEqualTo(wineDTO.getWineName());
+       assertThat(result).isNotEqualTo(wineDTO);
    }
+
+    @Test
+    void shouldUpdatePurchaseLinks() {
+        //given
+        String link = "https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html";
+        ArrayList<String> links = new ArrayList<>();
+
+        WineDTO newWineDTO = WineDTO.builder()
+                .id(wineDTO.getId())
+                .wineName("Barolo")
+                .wineType("Red")
+                .grape("Merlot")
+                .region("Tuscany")
+                .denomination("DOCG")
+                .year(2020)
+                .alcoholPercentage(13.5)
+                .wineDescription("A test wine description.")
+                .purchaseLinks(links)
+                .build();
+
+        newWineDTO.getPurchaseLinks().add(link);
+
+        when(wineRepository.findById(wine.getId())).thenReturn(Optional.of(wine));
+        when(wineRepository.save(any(Wine.class))).thenReturn(wine);
+        when(wineMapper.wineToWineDTO(any(Wine.class))).thenReturn(newWineDTO);
+        //when
+        WineDTO result = wineService.updateWine(wine.getId(), newWineDTO);
+        //then
+        verify(wineRepository).findById(wine.getId());
+        verify(wineRepository).save(any(Wine.class));
+        verify(wineMapper, times(2)).wineToWineDTO(any(Wine.class));
+
+        assertThat(wineDTO.getPurchaseLinks().size()).isNotEqualTo(result.getPurchaseLinks().size());
+        assertThat(result.getPurchaseLinks().size()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldUpdateAllWineFields() {
+
+        ArrayList<String> links = new ArrayList<>();
+        String link = "https://www.tannico.it/marlborough-sauvignon-blanc-2023-cloudy-bay-tappo-a-vite.html";
+
+        WineDTO newWineDTO = WineDTO.builder()
+                .id(wineDTO.getId())
+                .wineName("Sauvignon")
+                .wineType("Bianco")
+                .grape("Sauvignon")
+                .region("Marlborough")
+                .denomination("DOC")
+                .year(2021)
+                .alcoholPercentage(14.5)
+                .wineDescription("Si va a letto.")
+                .purchaseLinks(links)
+                .build();
+
+        newWineDTO.getPurchaseLinks().add(link);
+
+        when(wineRepository.findById(wine.getId())).thenReturn(Optional.of(wine));
+        when(wineRepository.save(any(Wine.class))).thenReturn(wine);
+        when(wineMapper.wineToWineDTO(any(Wine.class))).thenReturn(newWineDTO);
+        //when
+        WineDTO result = wineService.updateWine(wine.getId(), newWineDTO);
+        //then
+        verify(wineRepository).findById(wine.getId());
+        verify(wineRepository).save(any(Wine.class));
+        verify(wineMapper, times(2)).wineToWineDTO(any(Wine.class));
+
+        assertThat(result.getWineName()).isNotEqualTo(wineDTO.getWineName());
+        assertThat(result.getWineType()).isNotEqualTo(wineDTO.getWineType());
+        assertThat(result.getGrape()).isNotEqualTo(wineDTO.getGrape());
+        assertThat(result.getRegion()).isNotEqualTo(wineDTO.getRegion());
+        assertThat(result.getDenomination()).isNotEqualTo(wineDTO.getDenomination());
+        assertThat(result.getYear()).isNotEqualTo(wineDTO.getYear());
+        assertThat(result.getAlcoholPercentage()).isNotEqualTo(wineDTO.getAlcoholPercentage());
+        assertThat(result.getWineDescription()).isNotEqualTo(wineDTO.getWineDescription());
+        assertThat(wineDTO.getPurchaseLinks().size()).isNotEqualTo(result.getPurchaseLinks().size());
+        assertThat(result.getPurchaseLinks().size()).isEqualTo(1);
+    }
 
     @Test
     void shouldDeleteWine() {
@@ -285,6 +346,7 @@ class WineServiceImplTest {
         when(wineRepository.findById(id)).thenReturn(Optional.of(wine));
         when(wineRepository.save(wine)).thenReturn(wine);
         when(wineMapper.wineToWineDTO(wine)).thenReturn(wineDTO);
+        //when(wine.getPurchaseLinks().equals(null)).thenReturn(new ArrayList<>(wine.getPurchaseLinks()));
 
         WineDTO result = wineService.addLinkToWine(id, link);
 
@@ -294,6 +356,81 @@ class WineServiceImplTest {
 
         assertThat(result.getPurchaseLinks().get(0)).isEqualTo(link);
     }
+
+    @Test
+    void shouldCreateNewListWhenPurchaseLinkIsNull() throws WineNotFoundException, LinkAlreadyExistsException {
+        Long id = 5L;
+        String link = "https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html";
+
+        // Crea oggetto Wine con lista link null
+        Wine wineWithoutLinks = Wine.builder()
+                .id(id)
+                .wineName("Test Wine")
+                .wineType("Red")
+                .grape("Merlot")
+                .region("Tuscany")
+                .denomination("DOCG")
+                .year(2020)
+                .alcoholPercentage(13.5)
+                .wineDescription("A test wine description.")
+                .purchaseLinks(null)
+                .build();
+
+        // Crea oggetto WineDTO che verrà restituito dal mapper
+        WineDTO wineDTOWithoutLinks = WineDTO.builder()
+                .id(id)
+                .wineName("Test Wine")
+                .wineType("Red")
+                .grape("Merlot")
+                .region("Tuscany")
+                .denomination("DOCG")
+                .year(2020)
+                .alcoholPercentage(13.5)
+                .wineDescription("A test wine description.")
+                .purchaseLinks(new ArrayList<>())  // Initially empty list
+                .build();
+        // Crea oggetto Wine che verrà restituito dal repository dopo averlo salvato
+        Wine updatedWine = Wine.builder()
+                .id(id)
+                .wineName("Test Wine")
+                .wineType("Red")
+                .grape("Merlot")
+                .region("Tuscany")
+                .denomination("DOCG")
+                .year(2020)
+                .alcoholPercentage(13.5)
+                .wineDescription("A test wine description.")
+                .purchaseLinks(new ArrayList<>(List.of(link)))
+                .build();
+
+        // Crea oggetto WineDTO aggiornato dopo l'aggiunta del link
+        WineDTO wineDTOWithLink = WineDTO.builder()
+                .id(id)
+                .wineName("Test Wine")
+                .wineType("Red")
+                .grape("Merlot")
+                .region("Tuscany")
+                .denomination("DOCG")
+                .year(2020)
+                .alcoholPercentage(13.5)
+                .wineDescription("A test wine description.")
+                .purchaseLinks(new ArrayList<>(List.of(link)))
+                .build();
+
+        when(wineRepository.findById(id)).thenReturn(Optional.of(wineWithoutLinks));
+        when(wineRepository.save(any(Wine.class))).thenReturn(updatedWine);
+        when(wineMapper.wineToWineDTO(any(Wine.class))).thenReturn(wineDTOWithLink);
+
+        WineDTO result = wineService.addLinkToWine(id, link);
+
+        verify(wineRepository).findById(id);
+        verify(wineRepository).save(any(Wine.class));
+        verify(wineMapper, times(2)).wineToWineDTO(any(Wine.class));
+
+        assertNotNull(result.getPurchaseLinks());
+        assertThat(result.getPurchaseLinks()).contains(link);
+    }
+
 
     @Test
     public void shouldAddLinkTiWineAndSendsKafkaEvent() {

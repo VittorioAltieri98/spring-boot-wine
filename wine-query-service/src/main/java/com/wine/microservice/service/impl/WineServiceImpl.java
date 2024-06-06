@@ -26,15 +26,18 @@ import static com.wine.microservice.specification.WineSpecification.hasMultipleF
 @Service
 public class WineServiceImpl implements WineService {
 
-    @Autowired
-    private WineRepository wineRepository;
+    private final WineRepository wineRepository;
 
-    @Autowired
-    private WinePairingServiceClient winePairingServiceClient;
+    private final WinePairingServiceClient winePairingServiceClient;
 
-    @Autowired
-    private WineMapper wineMapper;
+    private final WineMapper wineMapper;
 
+
+    public WineServiceImpl(WineRepository wineRepository, WinePairingServiceClient winePairingServiceClient, WineMapper wineMapper){
+        this.wineRepository = wineRepository;
+        this.winePairingServiceClient = winePairingServiceClient;
+        this.wineMapper = wineMapper;
+    }
 
     public WineDTO getWineById(Long id) throws WineNotFoundException {
         Optional<Wine> optional = wineRepository.findById(id);

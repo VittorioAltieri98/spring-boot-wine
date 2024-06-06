@@ -18,20 +18,24 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
 @Service
 public class WineServiceImpl implements WineService {
 
-    @Autowired
-    private WineRepository wineRepository;
+    private final WineRepository wineRepository;
 
-    @Autowired
-    private WineMapper wineMapper;
+    private final WineMapper wineMapper;
 
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public WineServiceImpl(WineRepository wineRepository, WineMapper wineMapper, KafkaTemplate<String, Object> kafkaTemplate) {
+        this.wineRepository = wineRepository;
+        this.wineMapper = wineMapper;
+        this.kafkaTemplate = kafkaTemplate;
+    }
 
     @Value("${kafka.wine.topic.name}")
     private String wineTopicName;
@@ -68,10 +72,14 @@ public class WineServiceImpl implements WineService {
     public WineDTO updateWine(Long id, WineDTO wineDTO) throws WineNotFoundException {
         Wine findWine = wineRepository.findById(id).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id: " + id));
 
-        //TODO
-        if(wineDTO.getWineName() != null){
+
+
+        if(Objects.nonNull(wineDTO.getWineName()) && !Objects.equals(findWine.getWineName(), wineDTO.getWineName())){
             findWine.setWineName(wineDTO.getWineName());
         }
+//        if(wineDTO.getWineName() != null){
+//            findWine.setWineName(wineDTO.getWineName());
+//        }
         if(wineDTO.getWineType() != null){
             findWine.setWineType(wineDTO.getWineType());
         }

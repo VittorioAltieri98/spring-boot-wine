@@ -2,6 +2,8 @@ package com.wine.microservice.service.impl;
 
 import com.wine.microservice.client.WinePairingServiceClient;
 import com.wine.microservice.dto.WineDTO;
+import com.wine.microservice.dto.WinePairingDTO;
+import com.wine.microservice.dto.WineResponseDTO;
 import com.wine.microservice.exception.WineNotFoundException;
 import com.wine.microservice.mapper.WineMapper;
 import com.wine.microservice.model.Wine;
@@ -153,15 +155,40 @@ class WineServiceImplTest {
 
         assertThat(winesDTO).hasSize(2);
     }
-    //    @Test
-//    void getWineDetailsWithPairings() {
-//    }
 
+    @Test
+    void testGetWineDetailsWithPairings() throws WineNotFoundException {
 
+        Long wineId = 1L;
+        Wine wine = new Wine();
+        wine.setId(wineId);
+        wine.setWineName("O' Barolo");
+        wine.setWineType("Rosso");
+        wine.setGrape("Uva");
+        wine.setRegion("Campania");
+        wine.setDenomination("DOC");
+        wine.setYear(2020);
+        wine.setAlcoholPercentage(17.8);
+        wine.setWineDescription("Maronn' quant è bono");
 
+        when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
 
+        Map<String, String> foodsPairingDescriptions = new HashMap<>();
+        foodsPairingDescriptions.put("PASTA", "Perfect with tomato sauce");
+        foodsPairingDescriptions.put("STEAK", "Great with red meat");
 
+        WinePairingDTO winePairingDTO = new WinePairingDTO();
+        winePairingDTO.setFoodPairings(List.of("PASTA, STEAK"));
+        winePairingDTO.setFoodsNameAndDescriptionOfWhyThePairingIsRecommended(foodsPairingDescriptions);
 
+        when(winePairingServiceClient.getWinePairingByWineId(wineId)).thenReturn(winePairingDTO);
+
+        WineResponseDTO response = wineService.getWineDetailsWithPairings(wineId);
+
+        assertEquals(wine.getId(), response.getId());
+        assertEquals(wine.getWineName(), response.getWineName());
+    }
+}
 
 //    @Test
 //    void shouldSearchWinesWithGivenFilters() {
@@ -294,5 +321,3 @@ class WineServiceImplTest {
 //    @Test
 //    void searchWines() {
 //    }
-
-}

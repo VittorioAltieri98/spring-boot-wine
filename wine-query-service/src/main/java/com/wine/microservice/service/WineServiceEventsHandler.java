@@ -23,12 +23,6 @@ public class WineServiceEventsHandler {
     @Autowired
     private WineMapper wineMapper;
 
-//    @Value("${kafka.wine.topic.name}")
-//    private String topicName;
-
-//    @Value("${spring.kafka.consumer.group-id}")
-//    private String groupId;
-
 
     @KafkaListener(topics = "${kafka.wine.topic.name}", groupId = "${spring.kafka.consumer.group-id}")
     public void processWineEvents(WineEvent wineEvent) {

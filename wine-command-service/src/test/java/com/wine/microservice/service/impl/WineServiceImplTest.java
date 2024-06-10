@@ -183,9 +183,8 @@ class WineServiceImplTest {
         //when
         when(wineRepository.findById(id)).thenReturn(Optional.empty());
         //then
-        assertThatThrownBy(() ->
-                wineService.updateWine(id, wineDTO)
-        ).isInstanceOf(WineNotFoundException.class)
+        assertThatThrownBy(() -> wineService.updateWine(id, wineDTO))
+                .isInstanceOf(WineNotFoundException.class)
                 .hasMessage("Vino non trovato con l'id: " + id);
 
         verify(wineRepository, never()).save(any());

@@ -16,5 +16,5 @@ public interface WinePairingService {
     public WineInfo generateWineInfoWithFilters(String wineType, String region);
     public WinePairingDTO getWinePairingById(Long id) throws WinePairingNotFoundException;
     public WinePairingDTO getWinePairingByWineId(Long wineId) throws WinePairingNotFoundException;
-    public void saveWinePair(WinePairing winePairing);
+//    public void saveWinePair(WinePairing winePairing);
 }

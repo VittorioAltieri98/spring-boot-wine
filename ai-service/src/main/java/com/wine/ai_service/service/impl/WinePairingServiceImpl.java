@@ -116,7 +116,7 @@ public class WinePairingServiceImpl implements WinePairingService {
         } else throw new WinePairingNotFoundException("WinePairing not found with id " + wineId);
     }
 
-    public void saveWinePair(WinePairing winePairing) {
-        winePairingRepository.save(winePairing);
-    }
+//    public void saveWinePair(WinePairing winePairing) {
+//        winePairingRepository.save(winePairing);
+//    }
 }

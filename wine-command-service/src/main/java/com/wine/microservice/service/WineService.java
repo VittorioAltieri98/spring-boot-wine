@@ -22,6 +22,4 @@ public interface WineService {
 
     public boolean isValidLink(String link);
 
-    //For Testing
-    public WineDTO getWineById(Long id);
 }

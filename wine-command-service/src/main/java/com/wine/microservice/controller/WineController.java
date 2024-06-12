@@ -43,11 +43,4 @@ public class WineController {
     public ResponseEntity<WineDTO> addLinkToWine(@PathVariable Long id, @RequestBody String link) throws WineNotFoundException, LinkAlreadyExistsException {
         return new ResponseEntity<>(wineService.addLinkToWine(id, link), HttpStatus.CREATED);
     }
-
-    //For Testing
-
-    @GetMapping("/{id}")
-    public ResponseEntity<WineDTO> getWineById(@PathVariable Long id) throws WineNotFoundException {
-        return new ResponseEntity<>(wineService.getWineById(id), HttpStatus.OK);
-    }
 }

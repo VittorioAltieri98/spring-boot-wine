@@ -157,14 +157,4 @@ public class WineServiceImpl implements WineService {
     public boolean isValidLink(String link) {
         return link.startsWith("https://") || link.startsWith("http://");
     }
-
-    //For Testing
-
-    public WineDTO getWineById(Long id) throws WineNotFoundException {
-        Optional<Wine> optional = wineRepository.findById(id);
-        if (optional.isPresent()) {
-            Wine wine = optional.get();
-            return wineMapper.wineToWineDTO(wine);
-        } else throw new WineNotFoundException("Vino non trovato con l'id: " + id);
-    }
 }

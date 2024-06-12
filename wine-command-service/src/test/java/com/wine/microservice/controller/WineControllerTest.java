@@ -1,13 +1,19 @@
 package com.wine.microservice.controller;
 
+import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.model.Wine;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -21,6 +27,7 @@ import org.testcontainers.utility.DockerImageName;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpMethod.*;
 
@@ -39,9 +46,25 @@ class WineControllerTest {
     @Autowired
     TestRestTemplate testRestTemplate;
 
+    private static WireMockServer wireMockServer;
+
     @DynamicPropertySource
     static void kafkaProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers);
+    }
+
+    @BeforeAll
+    public static void startWireMockServer() {
+        wireMockServer = new WireMockServer(WireMockConfiguration.wireMockConfig().port(8084));
+        wireMockServer.start();
+        WireMock.configureFor("localhost", 8084);
+    }
+
+    @AfterAll
+    public static void stopWireMockServer() {
+        if(wireMockServer != null) {
+            wireMockServer.stop();
+        }
     }
 
     @Test
@@ -72,9 +95,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Barolo\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescriptio\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> createdWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );

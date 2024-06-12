@@ -101,7 +101,7 @@ class WineControllerTest {
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Barolo\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescriptio\": \"Buonissimo mamma mia\" }")));
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Barolo\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
 
         ResponseEntity<WineDTO> createdWine = testRestTemplate.exchange(
                 "http://localhost:8084/wine/" + wineId,
@@ -161,9 +161,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Chianti\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -225,9 +233,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Tavernello Upa\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -243,9 +259,17 @@ class WineControllerTest {
 
         assertThat(updatedWineResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+        Long otherWineId = updatedWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + otherWineId + "\", \"wineName\": \"Tavernello Upa\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenAfterUpdateWine = testRestTemplate.exchange(
-                "/wine/" + updatedWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -290,9 +314,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Montepulciano\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -374,9 +406,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Sauvignon\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -392,9 +432,17 @@ class WineControllerTest {
 
         assertThat(deletedWineResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
 
+        Long deletedWineId = gottenWine.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + deletedWineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.NOT_FOUND.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("")));
+
         ResponseEntity<WineDTO> deletedWine = testRestTemplate.exchange(
-                "/wine/" + gottenWine.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + deletedWineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -424,9 +472,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Federico\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -468,9 +524,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Peppino\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -486,9 +550,17 @@ class WineControllerTest {
 
         assertThat(addLinkToWine.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineWithLinkId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineWithLinkId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineWithLinkId + "\", \"wineName\": \"Peppino\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\", \"purchaseLinks\": [\"https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html\"] }")));
+
         ResponseEntity<WineDTO> gottenWineWithLink = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -524,9 +596,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Alfredo\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );
@@ -568,9 +648,17 @@ class WineControllerTest {
 
         assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
 
+        Long wineId = createWineResponse.getBody().getId();
+
+        stubFor(get(urlEqualTo("/wine/" + wineId))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{ \"id\": \"" + wineId + "\", \"wineName\": \"Gianni\", \"wineType\": \"Red\", \"grape\": \"Uva\", \"region\": \"Campania\", \"denomination\": \"DOC\", \"year\": 2020, \"alcoholPercentage\": 17.0, \"wineDescription\": \"Buonissimo mamma mia\" }")));
+
         ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
-                "/wine/" + createWineResponse.getBody().getId(),
-                GET,
+                "http://localhost:8084/wine/" + wineId,
+                HttpMethod.GET,
                 null,
                 WineDTO.class
         );

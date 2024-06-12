@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/wine")
 public class WineController {
@@ -42,4 +44,10 @@ public class WineController {
         return new ResponseEntity<>(wineService.addLinkToWine(id, link), HttpStatus.CREATED);
     }
 
+    //For Testing
+
+    @GetMapping("/{id}")
+    public ResponseEntity<WineDTO> getWineById(@PathVariable Long id) throws WineNotFoundException {
+        return new ResponseEntity<>(wineService.getWineById(id), HttpStatus.OK);
+    }
 }

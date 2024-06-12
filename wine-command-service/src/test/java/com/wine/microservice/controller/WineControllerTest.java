@@ -86,6 +86,81 @@ class WineControllerTest {
     }
 
     @Test
+    void shouldNotCreateWineWhenFieldIsEmpty(){
+        WineDTO wineDTO = WineDTO.builder()
+                .wineName("")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void shouldNotCreateWineWhenAlreadyExists(){
+        WineDTO wineDTO = WineDTO.builder()
+                .wineName("Chianti")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
+                "/wine/" + createWineResponse.getBody().getId(),
+                GET,
+                null,
+                WineDTO.class
+        );
+
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        WineDTO sameWineDTO = WineDTO.builder()
+                .wineName("Chianti")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createSameWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(sameWineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createSameWineResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+    }
+
+    @Test
     void shouldUpdateWine() {
 
         WineDTO dataWineDTO = WineDTO.builder()
@@ -126,6 +201,8 @@ class WineControllerTest {
                 WineDTO.class
         );
 
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
         ResponseEntity<WineDTO> updatedWineResponse = testRestTemplate.exchange(
                 "/wine/"+ gottenWine.getBody().getId() +"/update",
                 PUT,
@@ -146,6 +223,91 @@ class WineControllerTest {
 
         assertThat(gottenWine.getBody().getWineType()).isEqualTo(gottenWine.getBody().getWineType());
         assertThat(gottenAfterUpdateWine.getBody().getWineName()).isNotEqualTo(gottenWine.getBody().getWineType());
+    }
+
+    @Test
+    void shouldNotUpdateWineWithEmptyFields() {
+
+        WineDTO dataWineDTO = WineDTO.builder()
+                .wineName("")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        WineDTO wineDTO = WineDTO.builder()
+                .wineName("Montepulciano")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
+                "/wine/" + createWineResponse.getBody().getId(),
+                GET,
+                null,
+                WineDTO.class
+        );
+
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ResponseEntity<WineDTO> updatedWineResponse = testRestTemplate.exchange(
+                "/wine/"+ gottenWine.getBody().getId() +"/update",
+                PUT,
+                new HttpEntity<>(dataWineDTO),
+                WineDTO.class
+        );
+
+        assertThat(updatedWineResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void shouldNotUpdateWineNotExisting() {
+        WineDTO wineDTO = WineDTO.builder()
+                .wineName("Nero D'Avola")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> updatedWineResponse = testRestTemplate.exchange(
+                "/wine/"+ 100L +"/update",
+                PUT,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(updatedWineResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -210,6 +372,47 @@ class WineControllerTest {
     }
 
     @Test
+    void shouldNotDeleteWineNotExisting(){
+        WineDTO wineDTO = WineDTO.builder()
+                .wineName("Federico")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
+                "/wine/" + createWineResponse.getBody().getId(),
+                GET,
+                null,
+                WineDTO.class
+        );
+
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ResponseEntity<Void> deletedWineResponse = testRestTemplate.exchange(
+                "/wine/"+ 100L +"/delete",
+                DELETE,
+                null,
+                Void.class
+        );
+
+        assertThat(deletedWineResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
     void shouldAddLinkToWine() {
         List<String> newLinks = new ArrayList<>();
 
@@ -263,5 +466,93 @@ class WineControllerTest {
 
         assertThat(gottenWineWithLink.getBody().getPurchaseLinks()).hasSize(1);
         assertThat(gottenWineWithLink.getBody().getPurchaseLinks()).contains("https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html");
+    }
+
+    @Test
+    void shouldNotAddInvalidLinkToWine(){
+        List<String> newLinks = new ArrayList<>();
+
+        WineDTO wineWithLinkDTO = WineDTO.builder()
+                .wineName("Alfredo")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonnissimo mamma mia")
+                .purchaseLinks(newLinks)
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineWithLinkDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
+                "/wine/" + createWineResponse.getBody().getId(),
+                GET,
+                null,
+                WineDTO.class
+        );
+
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ResponseEntity<WineDTO> addLinkToWine = testRestTemplate.exchange(
+                "/wine/"+ createWineResponse.getBody().getId() + "/addLink",
+                POST,
+                new HttpEntity<>("hhhhh://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html"),
+                WineDTO.class
+        );
+
+        assertThat(addLinkToWine.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Test
+    void shouldNotAddLinkAlreadyAddedToWine() {
+        List<String> newLinks = new ArrayList<>();
+
+        WineDTO wineWithLinkDTO = WineDTO.builder()
+                .wineName("Gianni")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonnissimo mamma mia")
+                .purchaseLinks(newLinks)
+                .build();
+
+        ResponseEntity<WineDTO> createWineResponse = testRestTemplate.exchange(
+                "/wine/create",
+                POST,
+                new HttpEntity<>(wineWithLinkDTO),
+                WineDTO.class
+        );
+
+        assertThat(createWineResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+
+        ResponseEntity<WineDTO> gottenWine = testRestTemplate.exchange(
+                "/wine/" + createWineResponse.getBody().getId(),
+                GET,
+                null,
+                WineDTO.class
+        );
+
+        assertThat(gottenWine.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        ResponseEntity<WineDTO> addLinkToWine = testRestTemplate.exchange(
+                "/wine/"+ 100L + "/addLink",
+                POST,
+                new HttpEntity<>("https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html"),
+                WineDTO.class
+        );
+
+        assertThat(addLinkToWine.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

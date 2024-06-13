@@ -124,7 +124,7 @@ public class WineServiceImpl implements WineService {
         wineRepository.delete(deletedWine);
     }
 
-    public WineDTO addLinkToWine(Long id, String link) throws WineNotFoundException, LinkAlreadyExistsException {
+    public WineDTO addLinkToWine(Long id, String link) throws WineNotFoundException, LinkAlreadyExistsException, IllegalArgumentException {
         Wine wine = wineRepository.findById(id).orElseThrow(() -> new WineNotFoundException("Vino non trovato con l'id:" + id));
         String trimmedLink = link.trim();
 

@@ -3,6 +3,7 @@ package com.wine.microservice.exception;
 
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -48,6 +49,14 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(WineAlreadyExistsException.class)
     public Map<String, String> handleWineAlreadyExistsException(WineAlreadyExistsException ex){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("Messaggio di errore", ex.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Map<String, String> handleIllegalArgumentException(IllegalArgumentException ex) {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("Messaggio di errore", ex.getMessage());
         return errorMap;

@@ -21,6 +21,7 @@
         <module>ai-service</module>
         <module>wine-command-service</module>
         <module>wine-query-service</module>
+        <module>gateway-service</module>
     </modules>
 
     <properties>

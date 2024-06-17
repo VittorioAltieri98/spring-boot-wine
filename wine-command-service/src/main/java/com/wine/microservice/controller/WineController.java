@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/wine")
+@RequestMapping("/wine-command")
 public class WineController {
 
     @Autowired

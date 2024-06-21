@@ -8,3 +8,9 @@ spring:
       properties:
         spring.json.trusted.packages: "com.wine.microservice.dto"
 
+#Questo uri viene usato per validare il token jwt in arrivo dal gateway
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs

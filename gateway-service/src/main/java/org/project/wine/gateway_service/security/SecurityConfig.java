@@ -16,8 +16,8 @@ public class SecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
         return serverHttpSecurity.csrf(csrf -> csrf.disable())
-                .authorizeExchange(exchange -> exchange.pathMatchers("/eureka/**")
-                        .permitAll()
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers("/eureka/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2ResourceServer((oauth) -> oauth.jwt(Customizer.withDefaults()))
                 //.securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) //Alternativa a sessionManagement

@@ -2,8 +2,12 @@ server:
   port: 8085
 
 spring:
+  application:
+    name: gateway-service
   cloud:
     gateway:
+      default-filters:
+        - TokenRelay=
       routes:
         - id: wine-command
           uri: lb://wine-command
@@ -20,14 +24,42 @@ spring:
           predicates:
             - Path=/ai/**
 
-  application:
-    name: gateway-service
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8081/realms/springboot-microservice-realm
+          jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            issuerUri: http://localhost:8081/realms/springboot-microservice-realm
+        registration:
+          microservice-auth:
+            provider: keycloak
+            clientId: microservice-auth
+            clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            authorizationGrantType: authorization_code
+            scope: openid
+
+  #security:
+   # oauth2:
+    #  resourceserver:
+     #   jwt:
+      #    issuer-uri: http://localhost:8081/realms/springboot-microservice-realm
+
+  #security:
+    #oauth2:
+      #resourceserver:
+        #opaquetoken:
+          #client-id: microservice-auth
+          #client-secret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+          #introspection-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/token/introspect
 
 eureka:
   client:

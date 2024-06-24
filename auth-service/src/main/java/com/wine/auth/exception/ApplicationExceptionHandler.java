@@ -38,7 +38,15 @@ public class ApplicationExceptionHandler {
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public Map<String, String> handleWineAlreadyExistsException(UserAlreadyExistsException ex){
+    public Map<String, String> handleUserAlreadyExistsException(UserAlreadyExistsException ex){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("Messaggio di errore", ex.getMessage());
+        return errorMap;
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(InvalidUserCredentialsException.class)
+    public Map<String, String> handleInvalidUserCredentialsException(InvalidUserCredentialsException ex){
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("Messaggio di errore", ex.getMessage());
         return errorMap;

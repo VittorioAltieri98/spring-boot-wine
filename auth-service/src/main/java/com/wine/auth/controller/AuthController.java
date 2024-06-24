@@ -1,9 +1,9 @@
 package com.wine.auth.controller;
 
-import com.wine.auth.config.KeycloakProvider;
 import com.wine.auth.dto.CreateUserRequest;
 import com.wine.auth.dto.CreateUserResponse;
 import com.wine.auth.dto.LoginRequest;
+import com.wine.auth.exception.InvalidUserCredentialsException;
 import com.wine.auth.exception.UserAlreadyExistsException;
 import com.wine.auth.service.KeycloakAdminClientService;
 import jakarta.validation.Valid;
@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginRequest loginRequest) throws InvalidUserCredentialsException {
         AccessTokenResponse response = keycloakAdminClientService.getAccessToken(loginRequest.getUsername(), loginRequest.getPassword());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

@@ -3,8 +3,10 @@ package com.wine.auth.service;
 import com.wine.auth.config.KeycloakProvider;
 import com.wine.auth.dto.CreateUserRequest;
 import com.wine.auth.dto.CreateUserResponse;
+import com.wine.auth.exception.InvalidUserCredentialsException;
 import com.wine.auth.exception.UserAlreadyExistsException;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
@@ -74,14 +76,14 @@ public class KeycloakAdminClientService {
         return mapToUserResponse(user);
     }
 
-    public AccessTokenResponse getAccessToken(String username, String password) {
+    public AccessTokenResponse getAccessToken(String username, String password) throws InvalidUserCredentialsException {
         Keycloak keycloak1 = kcCredentials.newKeycloakBuilderWithPasswordCredentials(username, password).build();
         AccessTokenResponse accessTokenResponse = null;
         try {
             accessTokenResponse = keycloak1.tokenManager().getAccessToken();
             return accessTokenResponse;
-        } catch (BadRequestException ex) {
-            throw new BadRequestException(ex.getMessage());
+        } catch (NotAuthorizedException ex) {
+            throw new InvalidUserCredentialsException("Username o Password non validi");
         }
     }
 

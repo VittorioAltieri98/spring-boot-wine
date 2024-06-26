@@ -5,6 +5,12 @@ spring:
   application:
     name: auth-service
 
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
+
 
   #Questo uri viene usato per validare il token jwt in arrivo dal gateway
 

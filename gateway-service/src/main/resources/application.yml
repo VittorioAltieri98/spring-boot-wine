@@ -7,7 +7,7 @@ spring:
   cloud:
     gateway:
       default-filters:
-        - TokenRelay=
+        - TokenRelay
       routes:
         - id: wine-command
           uri: lb://wine-command
@@ -27,14 +27,11 @@ spring:
         - id: auth-service
           uri: lb://auth-service
           predicates:
-            - Path=/auth/**
+            - Path=/user/**
 
 
   security:
     oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
       client:
         provider:
           keycloak:
@@ -43,9 +40,10 @@ spring:
           microservice-auth:
             provider: keycloak
             clientId: microservice-auth
-            clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
             authorizationGrantType: authorization_code
             scope: openid
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
 
   #security:
    # oauth2:

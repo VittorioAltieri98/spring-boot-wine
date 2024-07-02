@@ -1,16 +1,23 @@
 package com.wine.ai_service.controller;
 
 import com.wine.ai_service.client.WineServiceClient;
+import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
+import com.wine.ai_service.model.UserWinePairing;
+import com.wine.ai_service.repository.UserWinePairingRepository;
 import com.wine.ai_service.service.WinePairingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/ai")
@@ -58,4 +65,17 @@ public class AiController {
         return new ResponseEntity<>(winePairingService.generateWineInfoWithFilters(wineType, region), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('user', 'admin')")
+    @PostMapping("/user/create/pairing")
+    public ResponseEntity<UserWinePairingDTO> createUserWinePairing(@RequestParam(value = "wineType") String wineType,
+                                                                    @RequestParam(value = "region") String region,
+                                                                    @AuthenticationPrincipal Jwt jwt) {
+        return new ResponseEntity<>(winePairingService.createUserWinePairing(wineType, region, jwt), HttpStatus.CREATED);
+    }
+
+    @PreAuthorize("hasAnyRole('user', 'admin')")
+    @GetMapping("/user/my-pairings")
+    public ResponseEntity<List<UserWinePairingDTO>> getUserWinePairings(@AuthenticationPrincipal Jwt jwt){
+        return new ResponseEntity<>(winePairingService.getUserWinePairings(jwt), HttpStatus.OK);
+    }
 }

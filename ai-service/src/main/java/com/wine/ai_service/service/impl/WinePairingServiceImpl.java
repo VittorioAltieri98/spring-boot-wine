@@ -1,12 +1,16 @@
 package com.wine.ai_service.service.impl;
 
 import com.wine.ai_service.client.WineServiceClient;
+import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
+import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
+import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.model.WinePairing;
+import com.wine.ai_service.repository.UserWinePairingRepository;
 import com.wine.ai_service.repository.WinePairingRepository;
 import com.wine.ai_service.service.WinePairingService;
 import org.springframework.ai.chat.ChatResponse;
@@ -18,17 +22,22 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class WinePairingServiceImpl implements WinePairingService {
 
     @Autowired
     private WinePairingRepository winePairingRepository;
+
+    @Autowired
+    private UserWinePairingRepository userWinePairingRepository;
 
     @Autowired
     private VertexAiGeminiChatClient vertexAiGeminiChatClient;
@@ -38,6 +47,9 @@ public class WinePairingServiceImpl implements WinePairingService {
 
     @Autowired
     private WinePairingMapper winePairingMapper;
+
+   @Autowired
+   private UserWinePairingMapper userWinePairingMapper;
 
 
     public WinePairingDTO generateWinePairing(Long id) {
@@ -116,7 +128,39 @@ public class WinePairingServiceImpl implements WinePairingService {
         } else throw new WinePairingNotFoundException("WinePairing not found with id " + wineId);
     }
 
-//    public void saveWinePair(WinePairing winePairing) {
-//        winePairingRepository.save(winePairing);
-//    }
+    @Override
+    public UserWinePairingDTO createUserWinePairing(String wineType, String region, Jwt jwt) {
+
+        String id = jwt.getSubject();
+
+        WineInfo wineInfo = generateWineInfoWithFilters(wineType, region);
+
+        UserWinePairing userWinePairing = UserWinePairing.builder()
+                .wineName(wineInfo.getWineName())
+                .wineType(wineInfo.getWineType())
+                .region(wineInfo.getRegion())
+                .denomination(wineInfo.getDenomination())
+                .wineDescription(wineInfo.getWineDescription())
+                .serviceTemperature(wineInfo.getServiceTemperature())
+                .foodPairings(wineInfo.getFoodPairings())
+                .foodsNameAndDescriptionOfWhyThePairingIsRecommended(wineInfo.getFoodsNameAndDescriptionOfWhyThePairingIsRecommended())
+                .userId(id)
+                .build();
+
+        return userWinePairingMapper.userWinePairingToUserWinePairingDTO(userWinePairingRepository.save(userWinePairing));
+    }
+
+    @Override
+    public List<UserWinePairingDTO> getUserWinePairings(Jwt jwt) {
+
+        String id = jwt.getSubject();
+
+        List<UserWinePairing> userWinePairings = userWinePairingRepository.findAllByUserId(id);
+
+        List<UserWinePairingDTO> response = userWinePairings.stream()
+                .map(pairing -> userWinePairingMapper.userWinePairingToUserWinePairingDTO(pairing))
+                .collect(Collectors.toList());
+
+        return response;
+    }
 }

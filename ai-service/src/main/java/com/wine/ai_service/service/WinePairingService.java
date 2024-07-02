@@ -1,11 +1,16 @@
 package com.wine.ai_service.service;
 
 
+import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
+import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.model.WinePairing;
+import org.springframework.security.oauth2.jwt.Jwt;
+
+import java.util.List;
 
 public interface WinePairingService {
 
@@ -16,5 +21,6 @@ public interface WinePairingService {
     public WineInfo generateWineInfoWithFilters(String wineType, String region);
     public WinePairingDTO getWinePairingById(Long id) throws WinePairingNotFoundException;
     public WinePairingDTO getWinePairingByWineId(Long wineId) throws WinePairingNotFoundException;
-//    public void saveWinePair(WinePairing winePairing);
+    public UserWinePairingDTO createUserWinePairing(String wineType, String region, Jwt jwt);
+    public List<UserWinePairingDTO> getUserWinePairings(Jwt jwt);
 }

@@ -23,6 +23,7 @@
         <module>wine-query-service</module>
         <module>gateway-service</module>
         <module>auth-service</module>
+        <module>user-service</module>
     </modules>
 
     <properties>

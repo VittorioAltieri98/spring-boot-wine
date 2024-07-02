@@ -21,17 +21,19 @@ public class WineController {
     private WineService wineService;
 
 
-    @PreAuthorize("hasAnyRole('user')")
+    @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/{id}")
     public ResponseEntity<WineDTO> getWineById(@PathVariable Long id) throws WineNotFoundException {
         return new ResponseEntity<>(wineService.getWineById(id), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/all")
     public ResponseEntity<List<WineDTO>> getAllWines(){
         return new ResponseEntity<>(wineService.getAllWines(), HttpStatus.OK);
     }
 
+    @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/search")
     public ResponseEntity<List<WineDTO>> searchWines(@RequestParam(required = false) String wineName,
                                      @RequestParam(required = false) String wineType,
@@ -44,7 +46,7 @@ public class WineController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/{id}/pairings")
     public ResponseEntity<WineResponseDTO> getWineDetailsWithPairings(@PathVariable Long id){
         return new ResponseEntity<>(wineService.getWineDetailsWithPairings(id), HttpStatus.OK);

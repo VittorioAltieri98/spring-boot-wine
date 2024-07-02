@@ -5,11 +5,6 @@ spring:
   application:
     name: auth-service
 
-
-  #Questo uri viene usato per validare il token jwt in arrivo dal gateway
-
-
-
 eureka:
   client:
     service-url:

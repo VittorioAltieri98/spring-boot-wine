@@ -12,7 +12,7 @@ public class WinePairingServiceClient {
     private RestTemplate restTemplate;
 
     public WinePairingDTO getWinePairingByWineId(Long wineId){
-        String winePairingServiceUrl = "http://localhost:8082/ai/winePairings/" + wineId;
+        String winePairingServiceUrl = "http://localhost:8082/ai/winePairing/by-wine-id/" + wineId;
         return restTemplate.getForObject(winePairingServiceUrl, WinePairingDTO.class);
     }
 }

@@ -1,4 +1,5 @@
 #Questo uri viene usato per validare il token jwt in arrivo dal gateway
+spring:
   security:
     oauth2:
       resourceserver:

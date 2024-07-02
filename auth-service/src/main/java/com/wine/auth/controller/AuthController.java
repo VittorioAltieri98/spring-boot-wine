@@ -10,10 +10,7 @@ import jakarta.validation.Valid;
 import org.keycloak.representations.AccessTokenResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
@@ -36,6 +33,5 @@ public class AuthController {
         AccessTokenResponse response = keycloakAdminClientService.getAccessToken(loginRequest.getUsername(), loginRequest.getPassword());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
 }
 

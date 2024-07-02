@@ -44,6 +44,9 @@ spring:
             authorizationGrantType: authorization_code
             scope: openid
             redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
 
   #security:
    # oauth2:

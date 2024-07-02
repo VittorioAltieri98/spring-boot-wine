@@ -1,20 +1,16 @@
 package com.wine.auth.service;
 
-import com.wine.auth.config.KeycloakProvider;
 import com.wine.auth.dto.CreateUserRequest;
 import com.wine.auth.dto.CreateUserResponse;
 import com.wine.auth.exception.InvalidUserCredentialsException;
 import com.wine.auth.exception.UserAlreadyExistsException;
-import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.RealmResource;
-import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.ClientRepresentation;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;

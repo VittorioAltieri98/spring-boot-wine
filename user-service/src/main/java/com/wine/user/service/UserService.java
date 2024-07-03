@@ -22,4 +22,6 @@ public interface UserService {
 
     public void deleteUser(String userId) throws UserNotFoundException;
 
+    public void deleteUserProfile(String userId);
+
 }

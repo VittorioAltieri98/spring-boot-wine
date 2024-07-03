@@ -56,4 +56,11 @@ public class UserController {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAnyRole('user')")
+    @DeleteMapping("/my-profile/delete")
+    public ResponseEntity<Void> deleteUserProfile(@AuthenticationPrincipal Jwt jwt) {
+        userService.deleteUserProfile(jwt.getSubject());
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

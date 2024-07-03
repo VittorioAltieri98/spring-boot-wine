@@ -86,6 +86,11 @@ public class UserServiceImpl implements UserService {
             keycloak.realm(realm).users().delete(userId);
     }
 
+    @Override
+    public void deleteUserProfile(String userId) {
+        keycloak.realm(realm).users().delete(userId);
+    }
+
 
     public UserInfo mapToUserInfo(UserRepresentation userRep) {
         UserInfo response = UserInfo.builder()

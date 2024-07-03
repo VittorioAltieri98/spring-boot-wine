@@ -24,4 +24,12 @@ public class ApplicationExceptionHandler {
         errorMap.put("Messaggio di errore", ex.getMessage());
         return errorMap;
     }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(UserWinePairingAlreadyExistsException.class)
+    public Map<String, String> handleUserWinePairingAlreadyExistsException(UserWinePairingAlreadyExistsException ex){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("Messaggio di errore", ex.getMessage());
+        return errorMap;
+    }
 }

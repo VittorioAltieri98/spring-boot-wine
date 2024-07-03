@@ -5,6 +5,7 @@ import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.repository.UserWinePairingRepository;
@@ -66,10 +67,10 @@ public class AiController {
     }
 
     @PreAuthorize("hasAnyRole('user', 'admin')")
-    @PostMapping("/user/create/pairing")
+    @GetMapping("/user/create/pairing")
     public ResponseEntity<UserWinePairingDTO> createUserWinePairing(@RequestParam(value = "wineType") String wineType,
                                                                     @RequestParam(value = "region") String region,
-                                                                    @AuthenticationPrincipal Jwt jwt) {
+                                                                    @AuthenticationPrincipal Jwt jwt) throws UserWinePairingAlreadyExistsException {
         return new ResponseEntity<>(winePairingService.createUserWinePairing(wineType, region, jwt), HttpStatus.CREATED);
     }
 

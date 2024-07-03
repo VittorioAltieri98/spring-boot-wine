@@ -8,4 +8,6 @@ import org.mapstruct.Mapper;
 public interface UserWinePairingMapper {
 
     UserWinePairingDTO userWinePairingToUserWinePairingDTO(UserWinePairing userWinePairing);
+
+
 }

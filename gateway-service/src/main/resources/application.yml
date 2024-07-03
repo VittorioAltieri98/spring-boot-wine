@@ -29,6 +29,11 @@ spring:
           predicates:
             - Path=/auth/**
 
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/user/**
+
   security:
     oauth2:
       resourceserver:
@@ -42,7 +47,8 @@ spring:
           microservice-auth:
             provider: keycloak
             clientId: microservice-auth
-            clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            #clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
             authorizationGrantType: authorization_code
             scope: openid
 

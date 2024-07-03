@@ -5,6 +5,7 @@ import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
@@ -129,25 +130,31 @@ public class WinePairingServiceImpl implements WinePairingService {
     }
 
     @Override
-    public UserWinePairingDTO createUserWinePairing(String wineType, String region, Jwt jwt) {
+    public UserWinePairingDTO createUserWinePairing(String wineType, String region, Jwt jwt) throws UserWinePairingAlreadyExistsException {
 
         String id = jwt.getSubject();
-
         WineInfo wineInfo = generateWineInfoWithFilters(wineType, region);
 
-        UserWinePairing userWinePairing = UserWinePairing.builder()
-                .wineName(wineInfo.getWineName())
-                .wineType(wineInfo.getWineType())
-                .region(wineInfo.getRegion())
-                .denomination(wineInfo.getDenomination())
-                .wineDescription(wineInfo.getWineDescription())
-                .serviceTemperature(wineInfo.getServiceTemperature())
-                .foodPairings(wineInfo.getFoodPairings())
-                .foodsNameAndDescriptionOfWhyThePairingIsRecommended(wineInfo.getFoodsNameAndDescriptionOfWhyThePairingIsRecommended())
-                .userId(id)
-                .build();
+        Optional<UserWinePairing> optionalUserWinePairing = userWinePairingRepository.findByWineNameAndUserId(wineInfo.getWineName(), id);
 
-        return userWinePairingMapper.userWinePairingToUserWinePairingDTO(userWinePairingRepository.save(userWinePairing));
+        if(optionalUserWinePairing.isPresent()) {
+            throw new UserWinePairingAlreadyExistsException("Abbinamento già esistente, riprovare.");
+        }
+            UserWinePairing userWinePairing = UserWinePairing.builder()
+                    .wineName(wineInfo.getWineName())
+                    .wineType(wineInfo.getWineType())
+                    .region(wineInfo.getRegion())
+                    .denomination(wineInfo.getDenomination())
+                    .wineDescription(wineInfo.getWineDescription())
+                    .serviceTemperature(wineInfo.getServiceTemperature())
+                    .foodPairings(wineInfo.getFoodPairings())
+                    .foodsNameAndDescriptionOfWhyThePairingIsRecommended(wineInfo.getFoodsNameAndDescriptionOfWhyThePairingIsRecommended())
+                    .userId(id)
+                    .build();
+
+        UserWinePairing savedUserWinePairing = userWinePairingRepository.save(userWinePairing);
+
+        return userWinePairingMapper.userWinePairingToUserWinePairingDTO(savedUserWinePairing);
     }
 
     @Override

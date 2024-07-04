@@ -6,6 +6,7 @@ import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
 import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
+import com.wine.ai_service.exception.UserWinePairingNotFoundException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
@@ -169,5 +170,18 @@ public class WinePairingServiceImpl implements WinePairingService {
                 .collect(Collectors.toList());
 
         return response;
+    }
+
+    @Override
+    public void deleteUserWinePairing(Long id, String userId) throws UserWinePairingNotFoundException {
+        //Ottieni userWinePairing dall'id.
+        //Verificare che l'oggetto userWinePairing abbia lo stesso userId dell'utente corrente.
+        //Altrimenti lanciare eccezione.
+
+        UserWinePairing userWinePairing = userWinePairingRepository.findById(id).orElseThrow(() -> new UserWinePairingNotFoundException("Abbinamento non trovato"));
+        if(userWinePairing.getUserId().equals(userId)) {
+            userWinePairingRepository.delete(userWinePairing);
+        }
+        else throw new UserWinePairingNotFoundException("Abbinamento non trovato");
     }
 }

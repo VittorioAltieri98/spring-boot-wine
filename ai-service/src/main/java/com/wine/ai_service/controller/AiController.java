@@ -6,6 +6,7 @@ import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.dto.WinePairingDTO;
 import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
+import com.wine.ai_service.exception.UserWinePairingNotFoundException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.repository.UserWinePairingRepository;
@@ -78,5 +79,13 @@ public class AiController {
     @GetMapping("/user/my-pairings")
     public ResponseEntity<List<UserWinePairingDTO>> getUserWinePairings(@AuthenticationPrincipal Jwt jwt){
         return new ResponseEntity<>(winePairingService.getUserWinePairings(jwt), HttpStatus.OK);
+    }
+
+
+    @PreAuthorize("hasAnyRole('user', 'admin')")
+    @DeleteMapping("/user/pairing/{id}/delete")
+    public ResponseEntity<Void> deleteUserWinePairing(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) throws UserWinePairingNotFoundException {
+        winePairingService.deleteUserWinePairing(id, jwt.getSubject());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

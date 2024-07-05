@@ -15,6 +15,6 @@ public interface UserWinePairingRepository extends JpaRepository<UserWinePairing
 
     Optional<UserWinePairing> findByWineNameAndUserId(String wineName,String id);
 
-    Optional<UserWinePairing> findByIdAndUserId(Long id, String userId);
+    void deleteByUserId(String userId);
 
 }

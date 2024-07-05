@@ -60,7 +60,8 @@ public class UserController {
     @PreAuthorize("hasAnyRole('user')")
     @DeleteMapping("/my-profile/delete")
     public ResponseEntity<Void> deleteUserProfile(@AuthenticationPrincipal Jwt jwt) {
-        userService.deleteUserProfile(jwt.getSubject());
+        userService.deleteUserProfile(jwt);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
 }

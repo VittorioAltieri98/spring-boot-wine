@@ -26,6 +26,7 @@ import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -183,5 +184,11 @@ public class WinePairingServiceImpl implements WinePairingService {
             userWinePairingRepository.delete(userWinePairing);
         }
         else throw new UserWinePairingNotFoundException("Abbinamento non trovato");
+    }
+
+    @Override
+    @Transactional
+    public void deleteAllUserWinePairing(String userid) {
+        userWinePairingRepository.deleteByUserId(userid);
     }
 }

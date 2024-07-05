@@ -6,10 +6,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -37,5 +34,11 @@ public class WinePairingServiceClient {
         );
 
         return response.getBody();
+    }
+
+    public void deleteAllUserWinePairing(String userId) {
+        String userWinePairingServiceDeleteUrl = "http://localhost:8082/ai/user/"+ userId +"/pairings/delete";
+
+        restTemplate.delete(userWinePairingServiceDeleteUrl);
     }
 }

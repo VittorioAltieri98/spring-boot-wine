@@ -25,4 +25,5 @@ public interface WinePairingService {
     public UserWinePairingDTO createUserWinePairing(String wineType, String region, Jwt jwt)throws UserWinePairingAlreadyExistsException;
     public List<UserWinePairingDTO> getUserWinePairings(Jwt jwt);
     public void deleteUserWinePairing(Long id, String userId);
+    public void deleteAllUserWinePairing(String userid);
 }

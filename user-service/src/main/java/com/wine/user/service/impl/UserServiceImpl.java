@@ -1,16 +1,22 @@
 package com.wine.user.service.impl;
 
 import com.wine.user.client.WinePairingServiceClient;
+import com.wine.user.config.KeycloakProvider;
 import com.wine.user.dto.UserInfo;
 import com.wine.user.dto.UserInfoWithID;
 import com.wine.user.dto.UserWinePairingDTO;
 import com.wine.user.exception.UserAlreadyExistsException;
 import com.wine.user.exception.UserNotFoundException;
 import com.wine.user.service.UserService;
+import jakarta.ws.rs.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.UserRepresentation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -18,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,15 +86,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) throws UserNotFoundException {
-        List<UserRepresentation> users = keycloak.realm(realm).users().search(userId, true);
-        if(users.isEmpty()) {
-            throw new UserNotFoundException("Utente con " + userId + " non trovato");
+        try {
+            UserResource userResource = keycloak.realm(realm).users().get(userId);
+            winePairingServiceClient.deleteAllUserWinePairing(userId);
+            userResource.remove();
+        } catch(NotFoundException ex) {
+            throw new UserNotFoundException("Utente con ID " + userId + " non trovato");
         }
-            keycloak.realm(realm).users().delete(userId);
     }
 
     @Override
-    public void deleteUserProfile(String userId) {
+    public void deleteUserProfile(Jwt jwt) {
+        String userId = jwt.getSubject();
+
+        winePairingServiceClient.deleteAllUserWinePairing(userId);
+        List<UserRepresentation> users = keycloak.realm(realm).users().search(userId, true);
+
         keycloak.realm(realm).users().delete(userId);
     }
 

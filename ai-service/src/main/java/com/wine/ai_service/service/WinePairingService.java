@@ -1,10 +1,7 @@
 package com.wine.ai_service.service;
 
 
-import com.wine.ai_service.dto.UserWinePairingDTO;
-import com.wine.ai_service.dto.WineDTO;
-import com.wine.ai_service.dto.WineInfo;
-import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.dto.*;
 import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.model.UserWinePairing;
@@ -26,4 +23,5 @@ public interface WinePairingService {
     public List<UserWinePairingDTO> getUserWinePairings(Jwt jwt);
     public void deleteUserWinePairing(Long id, String userId);
     public void deleteAllUserWinePairing(String userid);
+    public List<PopularPairing> getTopPopularPairings();
 }

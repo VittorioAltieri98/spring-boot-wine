@@ -1,17 +1,16 @@
 package com.wine.ai_service.service.impl;
 
 import com.wine.ai_service.client.WineServiceClient;
-import com.wine.ai_service.dto.UserWinePairingDTO;
-import com.wine.ai_service.dto.WineDTO;
-import com.wine.ai_service.dto.WineInfo;
-import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.dto.*;
 import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
 import com.wine.ai_service.exception.UserWinePairingNotFoundException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
 import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
+import com.wine.ai_service.model.PairingRequest;
 import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.model.WinePairing;
+import com.wine.ai_service.repository.PairingRequestRepository;
 import com.wine.ai_service.repository.UserWinePairingRepository;
 import com.wine.ai_service.repository.WinePairingRepository;
 import com.wine.ai_service.service.WinePairingService;
@@ -28,6 +27,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +42,9 @@ public class WinePairingServiceImpl implements WinePairingService {
 
     @Autowired
     private WinePairingRepository winePairingRepository;
+
+    @Autowired
+    private PairingRequestRepository pairingRequestRepository;
 
     @Autowired
     private UserWinePairingRepository userWinePairingRepository;
@@ -150,13 +157,35 @@ public class WinePairingServiceImpl implements WinePairingService {
                     .wineDescription(wineInfo.getWineDescription())
                     .serviceTemperature(wineInfo.getServiceTemperature())
                     .foodPairings(wineInfo.getFoodPairings())
+                    .pairingDate(LocalDateTime.now())
                     .foodsNameAndDescriptionOfWhyThePairingIsRecommended(wineInfo.getFoodsNameAndDescriptionOfWhyThePairingIsRecommended())
                     .userId(id)
                     .build();
 
         UserWinePairing savedUserWinePairing = userWinePairingRepository.save(userWinePairing);
 
+        savePairingRequest(id, wineType, region);
+
         return userWinePairingMapper.userWinePairingToUserWinePairingDTO(savedUserWinePairing);
+    }
+
+    public void savePairingRequest(String userId, String wineType, String region) {
+        PairingRequest pairingRequest = PairingRequest.builder()
+                .userId(userId)
+                .wineType(wineType)
+                .region(region)
+                .requestDate(LocalDateTime.now())
+                .build();
+
+        pairingRequestRepository.save(pairingRequest);
+    }
+
+    public List<PopularPairing> getTopPopularPairings() {
+        List<Object[]> results = pairingRequestRepository.findGroupedPairingRequests();
+
+        return results.stream()
+                .map(result -> new PopularPairing((String) result[0], (String) result[1], (Long) result[2]))
+                .collect(Collectors.toList());
     }
 
     @Override

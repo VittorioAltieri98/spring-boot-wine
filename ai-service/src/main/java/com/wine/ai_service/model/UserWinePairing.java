@@ -9,6 +9,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.type.SqlTypes;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,7 @@ public class UserWinePairing {
     private List<String> foodPairings;
     private String serviceTemperature;
     private String wineDescription;
+    private LocalDateTime pairingDate;
 
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, String> foodsNameAndDescriptionOfWhyThePairingIsRecommended;

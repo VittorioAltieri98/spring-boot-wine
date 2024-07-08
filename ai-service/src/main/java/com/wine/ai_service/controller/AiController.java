@@ -1,10 +1,7 @@
 package com.wine.ai_service.controller;
 
 import com.wine.ai_service.client.WineServiceClient;
-import com.wine.ai_service.dto.UserWinePairingDTO;
-import com.wine.ai_service.dto.WineDTO;
-import com.wine.ai_service.dto.WineInfo;
-import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.dto.*;
 import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
 import com.wine.ai_service.exception.UserWinePairingNotFoundException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
@@ -101,5 +98,12 @@ public class AiController {
     public ResponseEntity<Void> deleteAllUserWinePairing(@PathVariable String userId){
         winePairingService.deleteAllUserWinePairing(userId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @PreAuthorize("hasAnyRole('user', 'admin')")
+    @GetMapping("/pairings/popular")
+    public ResponseEntity<List<PopularPairing>> getPopularPairings() {
+        return new ResponseEntity<>(winePairingService.getTopPopularPairings(), HttpStatus.OK);
     }
 }

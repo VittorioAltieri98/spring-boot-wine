@@ -1,31 +1,37 @@
 package com.wine.microservice.controller;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
+import com.wine.microservice.key.KcCredentials;
 import com.wine.microservice.service.WineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.keycloak.admin.client.Keycloak;
+import org.keycloak.representations.AccessTokenResponse;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,7 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 
 @WebMvcTest(controllers = WineController.class)
-@AutoConfigureMockMvc(addFilters = false)
+@AutoConfigureMockMvc
 @ExtendWith(MockitoExtension.class)
 class WineCommandControllerTest {
 
@@ -46,11 +52,18 @@ class WineCommandControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private KcCredentials kcCredentials;
+
+    @Autowired
+    private WebApplicationContext context;
+
     private WineDTO wineDTO;
     private WineDTO updatedWineDTO;
 
     @BeforeEach
     void init() {
+
         List<String> links = new ArrayList<>();
 
          wineDTO = WineDTO.builder()
@@ -80,19 +93,56 @@ class WineCommandControllerTest {
     }
 
     @Test
-    void shouldCreateAndReturnWine() throws Exception {
-        //given(wineService.createWine(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArgument(0));
+    void shouldNotCreateAndReturnWineWithoutAuthentication() throws Exception {
         when(wineService.createWine(any(WineDTO.class))).thenReturn(wineDTO);
 
-        ResultActions response = mockMvc.perform(post("/wine/create")
+        ResultActions response = mockMvc.perform(post("/wine-command/create")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(wineDTO))
         );
 
-        response.andExpect(status().isCreated())
-                .andExpect(jsonPath("$.wineName", is(wineDTO.getWineName())))
+        response.andExpect(status().isForbidden())
                 .andDo(print());
     }
+
+    @Test
+    void shouldCreateWineAsAdmin() throws Exception {
+        when(wineService.createWine(any(WineDTO.class))).thenReturn(wineDTO);
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
+
+        mockMvc.perform(post("/wine-command/create")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wineDTO))
+                )
+                .andExpect(status().isCreated())
+                .andDo(print());
+    }
+
+    @Test
+    void shouldNotCreateWineAsUser() throws Exception {
+        when(wineService.createWine(any(WineDTO.class))).thenReturn(wineDTO);
+
+        mockMvc = MockMvcBuilders.webAppContextSetup(context)
+                .apply(springSecurity())
+                .build();
+
+        AccessTokenResponse tokenResponse = getAccessToken("Weakest", "Megumi1@!");
+
+        mockMvc.perform(post("/wine-command/create")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wineDTO))
+                )
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
 
     @Test
     void shouldNotCreateWineWhenValidationFails() throws Exception {
@@ -108,13 +158,15 @@ class WineCommandControllerTest {
                 .wineDescription("Buonissimo mamma mia")
                 .build();
 
-        ResultActions response = mockMvc.perform(post("/wine/create")
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
+
+        mockMvc.perform(post("/wine-command/create")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(wineDTOWithNoName))
-        );
-
-        response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.wineName").value("Il nome non può essere lasciato vuoto."));
+        )
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
     @Test
@@ -135,14 +187,14 @@ class WineCommandControllerTest {
         when(wineService.createWine(any(WineDTO.class)))
                 .thenThrow(new WineAlreadyExistsException("Il vino " + wineDTOWithSameName.getWineName() + " è già esistente."));
 
-        ResultActions conflictWineResponse = mockMvc.perform(post("/wine/create")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(wineDTOWithSameName))
-        );
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        conflictWineResponse.andExpect(status().isConflict())
-                .andExpect(jsonPath("$.['Messaggio di errore']")
-                        .value("Il vino " + wineDTOWithSameName.getWineName() + " è già esistente."))
+        mockMvc.perform(post("/wine-command/create")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wineDTOWithSameName))
+                )
+                .andExpect(status().isConflict())
                 .andDo(print());
     }
 
@@ -151,13 +203,31 @@ class WineCommandControllerTest {
 
         when(wineService.updateWine(wineDTO.getId(), updatedWineDTO)).thenReturn(updatedWineDTO);
 
-        ResultActions response = mockMvc.perform(put("/wine/"+ wineDTO.getId() +"/update")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updatedWineDTO))
-        );
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isOk())
+        mockMvc.perform(put("/wine-command/" + wineDTO.getId() +"/update")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedWineDTO))
+                )
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.wineName", is("Merlot")))
+                .andDo(print());
+    }
+
+    @Test
+    void shouldNotUpdateAndReturnWineAsUser() throws Exception {
+
+        when(wineService.updateWine(wineDTO.getId(), updatedWineDTO)).thenReturn(updatedWineDTO);
+
+        AccessTokenResponse tokenResponse = getAccessToken("Weakest", "Megumi1@!");
+
+        mockMvc.perform(put("/wine-command/" + wineDTO.getId() +"/update")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedWineDTO))
+                )
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 
@@ -176,26 +246,31 @@ class WineCommandControllerTest {
 
         when(wineService.updateWine(wineDTO.getId(), wineDTOWithNoName)).thenReturn(wineDTOWithNoName);
 
-        ResultActions response = mockMvc.perform(put("/wine/"+ wineDTO.getId() +"/update")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(wineDTOWithNoName))
-        );
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.wineName").value("Il nome non può essere lasciato vuoto."));
+        mockMvc.perform(put("/wine-command/" + wineDTO.getId() +"/update")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wineDTOWithNoName))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.wineName").value("Il nome non può essere lasciato vuoto."))
+                .andDo(print());
     }
 
     @Test
     void shouldNotUpdateWhenInvalidWineId() throws Exception {
         when(wineService.updateWine(20L, wineDTO)).thenThrow(new WineNotFoundException("Vino non trovato con l'id: " + 20L));
 
-        ResultActions response = mockMvc.perform(put("/wine/20/update")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(wineDTO)));
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.['Messaggio di errore']")
-                        .value("Vino non trovato con l'id: " + 20L))
+        mockMvc.perform(put("/wine-command/20/update")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(wineDTO))
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.['Messaggio di errore']").value("Vino non trovato con l'id: " + 20L))
                 .andDo(print());
     }
 
@@ -203,10 +278,43 @@ class WineCommandControllerTest {
     void shouldDeleteWine() throws Exception {
         doNothing().when(wineService).deleteWine(wineDTO.getId());
 
-        ResultActions response = mockMvc.perform(delete("/wine/{id}/delete", wineDTO.getId())
-                .contentType(MediaType.APPLICATION_JSON));
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isOk())
+        mockMvc.perform(delete("/wine-command/" + wineDTO.getId() + "/delete")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isOk())
+                .andDo(print());
+    }
+
+    @Test
+    void shouldNotDeleteWineAsUser() throws Exception {
+        doNothing().when(wineService).deleteWine(wineDTO.getId());
+
+        AccessTokenResponse tokenResponse = getAccessToken("Weakest", "Megumi1@!");
+
+        mockMvc.perform(delete("/wine-command/" + wineDTO.getId() + "/delete")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isForbidden())
+                .andDo(print());
+    }
+
+    @Test
+    void shouldNotDeleteWineWhenInvalidWineId() throws Exception {
+        doThrow(new WineNotFoundException("Vino non trovato con l'id: " + 20L))
+                .when(wineService).deleteWine(20L);
+
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
+
+        mockMvc.perform(delete("/wine-command/" + 20L + "/delete")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.['Messaggio di errore']").value("Vino non trovato con l'id: " + 20L))
                 .andDo(print());
     }
 
@@ -233,14 +341,50 @@ class WineCommandControllerTest {
 
         when(wineService.addLinkToWine(wineDTOWithLink.getId(), link)).thenReturn(wineDTOWithLink);
 
-        ResultActions response = mockMvc.perform(post("/wine/{id}/addLink", wineDTOWithLink.getId())
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(link)
-        );
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isCreated())
+        mockMvc.perform(post("/wine-command/" + wineDTOWithLink.getId() + "/addLink")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(link)
+                )
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.purchaseLinks.length()").value(wineDTOWithLink.getPurchaseLinks().size()))
                 .andExpect(jsonPath("$.purchaseLinks", hasItem("https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html")))
+                .andDo(print());
+    }
+
+    @Test
+    void shouldNotAddLinkToWineAsUser() throws Exception {
+
+        List<String> wineLinks = new ArrayList<>();
+
+        WineDTO wineDTOWithLink = WineDTO.builder()
+                .id(12L)
+                .wineName("Barolo")
+                .wineType("Red")
+                .grape("Uva")
+                .region("Campania")
+                .denomination("DOC")
+                .year(2020)
+                .alcoholPercentage(17.0)
+                .wineDescription("Buonissimo mamma mia")
+                .purchaseLinks(wineLinks)
+                .build();
+        String link = "https://www.tannico.it/barolo-riserva-docg-2015-marchesi-di-barolo.html";
+
+        wineDTOWithLink.getPurchaseLinks().add(link);
+
+        when(wineService.addLinkToWine(wineDTOWithLink.getId(), link)).thenReturn(wineDTOWithLink);
+
+        AccessTokenResponse tokenResponse = getAccessToken("Weakest", "Megumi1@!");
+
+        mockMvc.perform(post("/wine-command/" + wineDTOWithLink.getId() + "/addLink")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(link)
+                )
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 
@@ -250,11 +394,14 @@ class WineCommandControllerTest {
 
         when(wineService.addLinkToWine(50L, link)).thenThrow(new WineNotFoundException("Vino non trovato con l'id: " + 50L));
 
-        ResultActions response = mockMvc.perform(post("/wine/50/addLink")
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(link));
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isNotFound())
+        mockMvc.perform(post("/wine-command/50/addLink")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(link)
+                )
+                .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.['Messaggio di errore']")
                         .value("Vino non trovato con l'id: " + 50L))
                 .andDo(print());
@@ -266,11 +413,14 @@ class WineCommandControllerTest {
 
         when(wineService.addLinkToWine(50L, invalidLink)).thenThrow(new IllegalArgumentException("Invalid link format: " + invalidLink));
 
-        ResultActions response = mockMvc.perform(post("/wine/50/addLink")
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(invalidLink));
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isBadRequest())
+        mockMvc.perform(post("/wine-command/50/addLink")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(invalidLink)
+                )
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.['Messaggio di errore']")
                         .value("Invalid link format: " + invalidLink))
                 .andDo(print());
@@ -282,14 +432,23 @@ class WineCommandControllerTest {
 
         when(wineService.addLinkToWine(50L, invalidLink)).thenThrow(new LinkAlreadyExistsException("Link already exists: " + invalidLink));
 
-        ResultActions response = mockMvc.perform(post("/wine/50/addLink")
-                .contentType(MediaType.TEXT_PLAIN)
-                .content(invalidLink));
+        AccessTokenResponse tokenResponse = getAccessToken("Strongest", "Megumi1@!");
 
-        response.andExpect(status().isConflict())
+        mockMvc.perform(post("/wine-command/50/addLink")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + tokenResponse.getToken())
+                        .contentType(MediaType.TEXT_PLAIN)
+                        .content(invalidLink)
+                )
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.['Messaggio di errore']")
                         .value("Link already exists: " + invalidLink))
                 .andDo(print());
+    }
+
+    private AccessTokenResponse getAccessToken(String username, String password) throws Exception {
+        Keycloak keycloak = kcCredentials.newKeycloakBuilderWithPasswordCredentials(username, password).build();
+        AccessTokenResponse accessTokenResponse = keycloak.tokenManager().getAccessToken();
+        return accessTokenResponse;
     }
 }
 

@@ -1,10 +1,17 @@
 package com.wine.ai_service.service.impl;
 
+import com.wine.ai_service.dto.PopularPairing;
+import com.wine.ai_service.dto.UserWinePairingDTO;
 import com.wine.ai_service.dto.WineDTO;
 import com.wine.ai_service.dto.WinePairingDTO;
+import com.wine.ai_service.exception.UserWinePairingNotFoundException;
 import com.wine.ai_service.exception.WinePairingNotFoundException;
+import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
+import com.wine.ai_service.model.UserWinePairing;
 import com.wine.ai_service.model.WinePairing;
+import com.wine.ai_service.repository.PairingRequestRepository;
+import com.wine.ai_service.repository.UserWinePairingRepository;
 import com.wine.ai_service.repository.WinePairingRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,14 +20,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class WinePairingServiceImplTest {
@@ -29,21 +38,58 @@ class WinePairingServiceImplTest {
     WinePairingServiceImpl winePairingService;
 
     @Mock
+    PairingRequestRepository pairingRequestRepository;
+
+    @Mock
     WinePairingRepository winePairingRepository;
 
     @Mock
+    UserWinePairingRepository userWinePairingRepository;
+
+    @Mock
     WinePairingMapper winePairingMapper;
+
+    @Mock
+    UserWinePairingMapper userWinePairingMapper;
 
 
     WinePairing winePairing;
 
     WinePairingDTO winePairingDTO;
 
+    UserWinePairing userWinePairing;
+
+    UserWinePairingDTO userWinePairingDTO;
+
     WineDTO wineDTO;
+
+    private Jwt jwt;
 
 
     @BeforeEach
     void setUp(){
+
+        userWinePairingDTO = UserWinePairingDTO.builder()
+                .wineName("Tavernello")
+                .wineType("Red")
+                .region("Campania")
+                .denomination("DOCG")
+                .serviceTemperature("16°")
+                .wineDescription("Popt Buon")
+                .build();
+
+        userWinePairing = UserWinePairing.builder()
+                .id(5L)
+                .userId("user-id")
+                .wineName(userWinePairingDTO.getWineName())
+                .wineType(userWinePairingDTO.getWineType())
+                .region(userWinePairingDTO.getRegion())
+                .denomination(userWinePairingDTO.getDenomination())
+                .serviceTemperature(userWinePairingDTO.getServiceTemperature())
+                .wineDescription(userWinePairingDTO.getWineDescription())
+                .build();
+
+
         List<String> foodPairings = new ArrayList<>();
         Map<String ,String> foodsAndNameDescriptions = new HashMap<>();
 
@@ -82,6 +128,77 @@ class WinePairingServiceImplTest {
 
     @AfterEach
     void tearDown() {
+    }
+
+    @Test
+    void deleteUserWinePairing_ShouldDeleteWhenUserIdMatches() throws UserWinePairingNotFoundException {
+        when(userWinePairingRepository.findById(5L)).thenReturn(Optional.of(userWinePairing));
+
+        winePairingService.deleteUserWinePairing(5L, "user-id");
+
+        verify(userWinePairingRepository, times(1)).delete(userWinePairing);
+    }
+
+    @Test
+    void deleteUserWinePairing_ShouldThrowExceptionWhenUserIdDoesNotMatch() {
+        when(userWinePairingRepository.findById(5L)).thenReturn(Optional.of(userWinePairing));
+
+        assertThrows(UserWinePairingNotFoundException.class, () -> {
+            winePairingService.deleteUserWinePairing(5L, "wrong-user-id");
+        });
+
+        verify(userWinePairingRepository, never()).delete(any(UserWinePairing.class));
+    }
+
+    @Test
+    void deleteUserWinePairing_ShouldThrowExceptionWhenUserWinePairingNotFound() {
+        when(userWinePairingRepository.findById(5L)).thenReturn(Optional.empty());
+
+        assertThrows(UserWinePairingNotFoundException.class, () -> {
+            winePairingService.deleteUserWinePairing(5L, "user-id");
+        });
+
+        verify(userWinePairingRepository, never()).delete(any(UserWinePairing.class));
+    }
+
+    @Test
+    void getTopPopularPairings_ShouldReturnListOfPopularPairings() {
+        List<Object[]> mockResults = Arrays.asList(
+                new Object[]{"Rosso", "Campania", 10L},
+                new Object[]{"Bianco", "Toscana", 5L}
+        );
+
+        when(pairingRequestRepository.findGroupedPairingRequests()).thenReturn(mockResults);
+
+        List<PopularPairing> result = winePairingService.getTopPopularPairings();
+
+        assertEquals(2, result.size());
+
+        assertEquals("Rosso", result.get(0).getWineType());
+        assertEquals("Campania", result.get(0).getRegion());
+        assertEquals(10L, result.get(0).getRequestCount());
+
+        assertEquals("Bianco", result.get(1).getWineType());
+        assertEquals("Toscana", result.get(1).getRegion());
+        assertEquals(5L, result.get(1).getRequestCount());
+
+        verify(pairingRequestRepository, times(1)).findGroupedPairingRequests();
+    }
+
+    @Test
+    void getUserWinePairings_ShouldReturnListOfUserWinePairingDTOs() {
+        jwt = mock(Jwt.class);
+        when(jwt.getSubject()).thenReturn("user-id");
+
+        when(userWinePairingRepository.findAllByUserId(anyString())).thenReturn(Collections.singletonList(userWinePairing));
+        when(userWinePairingMapper.userWinePairingToUserWinePairingDTO(any(UserWinePairing.class))).thenReturn(userWinePairingDTO);
+
+        List<UserWinePairingDTO> result = winePairingService.getUserWinePairings(jwt);
+
+        assertEquals(1, result.size());
+        assertEquals("Tavernello", result.get(0).getWineName());
+        verify(userWinePairingRepository, times(1)).findAllByUserId("user-id");
+        verify(userWinePairingMapper, times(1)).userWinePairingToUserWinePairingDTO(userWinePairing);
     }
 
 

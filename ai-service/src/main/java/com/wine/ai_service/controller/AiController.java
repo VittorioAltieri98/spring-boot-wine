@@ -86,13 +86,6 @@ public class AiController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-//    @PreAuthorize("hasAnyRole('user', 'admin')")
-//    @DeleteMapping("/user/my-pairing/delete")
-//    public ResponseEntity<Void> deleteAllUserWinePairing(@AuthenticationPrincipal Jwt jwt) {
-//        winePairingService.deleteAllUserWinePairing(jwt.getSubject());
-//        return new ResponseEntity<>(HttpStatus.OK);
-//    }
-
     @PreAuthorize("hasAnyRole('user', 'admin')")
     @DeleteMapping("/user/{userId}/pairings/delete")
     public ResponseEntity<Void> deleteAllUserWinePairing(@PathVariable String userId){

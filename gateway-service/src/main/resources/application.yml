@@ -47,8 +47,8 @@ spring:
           microservice-auth:
             provider: keycloak
             clientId: microservice-auth
-            #clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
-            clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
+            clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            #clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
             authorizationGrantType: authorization_code
             scope: openid
 

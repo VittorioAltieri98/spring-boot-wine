@@ -506,7 +506,7 @@ class WineQueryControllerTest {
                 username,
                 password,
                 "admin-cli",
-                "**********"
+                "jjmGXtMwi6po23Cxahldp3svXzHlUxQz"
         );
         AccessTokenResponse accessTokenResponse = keycloak.tokenManager().getAccessToken();
         return accessTokenResponse;

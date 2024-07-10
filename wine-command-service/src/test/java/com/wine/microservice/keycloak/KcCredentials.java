@@ -1,22 +1,10 @@
-package com.wine.microservice.key;
+package com.wine.microservice.keycloak;
 
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class KcCredentials {
-
-//    @Value("${keycloak.auth-server-url}")
-//    public String serverURL;
-//
-//    @Value("${keycloak.realm}")
-//    public String realm;
-//
-//    @Value("${keycloak.resource}")
-//    public String clientID;
-//
-//    @Value("${keycloak.credentials.secret}")
-//    public String clientSecret;
 
     public KeycloakBuilder newKeycloakBuilderWithPasswordCredentials(String username, String password) {
         return KeycloakBuilder.builder()

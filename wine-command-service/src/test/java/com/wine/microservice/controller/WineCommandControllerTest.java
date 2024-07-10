@@ -5,7 +5,7 @@ import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
-import com.wine.microservice.key.KcCredentials;
+import com.wine.microservice.keycloak.KcCredentials;
 import com.wine.microservice.service.WineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

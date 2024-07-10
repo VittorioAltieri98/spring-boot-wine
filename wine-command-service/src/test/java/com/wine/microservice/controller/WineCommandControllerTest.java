@@ -5,7 +5,6 @@ import com.wine.microservice.dto.WineDTO;
 import com.wine.microservice.exception.LinkAlreadyExistsException;
 import com.wine.microservice.exception.WineAlreadyExistsException;
 import com.wine.microservice.exception.WineNotFoundException;
-import com.wine.microservice.keycloak.KcCredentials;
 import com.wine.microservice.service.WineService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,9 +50,6 @@ class WineCommandControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private KcCredentials kcCredentials;
 
     @Autowired
     private WebApplicationContext context;
@@ -445,8 +441,15 @@ class WineCommandControllerTest {
                 .andDo(print());
     }
 
-    private AccessTokenResponse getAccessToken(String username, String password) throws Exception {
-        Keycloak keycloak = kcCredentials.newKeycloakBuilderWithPasswordCredentials(username, password).build();
+    private AccessTokenResponse getAccessToken(String username, String password) {
+        Keycloak keycloak = Keycloak.getInstance(
+                "http://localhost:8081/",
+                "springboot-microservice-realm",
+                username,
+                password,
+                "admin-cli",
+                "**********"
+        );
         AccessTokenResponse accessTokenResponse = keycloak.tokenManager().getAccessToken();
         return accessTokenResponse;
     }

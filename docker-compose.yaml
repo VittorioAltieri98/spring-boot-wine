@@ -86,11 +86,11 @@ services:
       DB_PASSWORD: keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_IMPORT: /opt/keycloak/data/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
+      KEYCLOAK_IMPORT: /opt/jboss/keycloak/imports/realm-export.json -Dkeycloak.profile.feature.upload_scripts=enabled
     ports:
       - "8081:8080"
     volumes:
-      - ./imports/:/opt/keycloak/data/imports
+      - ./imports/realm-export.json:/opt/jboss/keycloak/imports/realm-export.json
     depends_on:
       - keycloak-db
 

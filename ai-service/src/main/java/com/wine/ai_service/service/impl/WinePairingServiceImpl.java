@@ -1,10 +1,9 @@
 package com.wine.ai_service.service.impl;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.wine.ai_service.client.WineServiceClient;
 import com.wine.ai_service.dto.*;
-import com.wine.ai_service.exception.UserWinePairingAlreadyExistsException;
-import com.wine.ai_service.exception.UserWinePairingNotFoundException;
-import com.wine.ai_service.exception.WinePairingNotFoundException;
+import com.wine.ai_service.exception.*;
 import com.wine.ai_service.mapper.UserWinePairingMapper;
 import com.wine.ai_service.mapper.WinePairingMapper;
 import com.wine.ai_service.model.PairingRequest;
@@ -14,6 +13,7 @@ import com.wine.ai_service.repository.PairingRequestRepository;
 import com.wine.ai_service.repository.UserWinePairingRepository;
 import com.wine.ai_service.repository.WinePairingRepository;
 import com.wine.ai_service.service.WinePairingService;
+import io.grpc.StatusRuntimeException;
 import org.springframework.ai.chat.ChatResponse;
 import org.springframework.ai.chat.Generation;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -117,10 +118,23 @@ public class WinePairingServiceImpl implements WinePairingService {
 
         PromptTemplate promptTemplate = new PromptTemplate(userMessage, Map.of("wineType", wineType, "region", region, "format", outputParser.getFormat()));
         Prompt prompt = promptTemplate.create();
-        Generation generation = vertexAiGeminiChatClient.call(prompt).getResult();
-        WineInfo wineInfo = outputParser.parse(generation.getOutput().getContent());
-        return wineInfo;
+        try {
+            Generation generation = vertexAiGeminiChatClient.call(prompt).getResult();
+            WineInfo wineInfo = outputParser.parse(generation.getOutput().getContent());
+            return wineInfo;
+        } catch (StatusRuntimeException e) {
+            throw new QuotaExceededException("Quota superata, riprovare tra qualche secondo", e);
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof JsonParseException) {
+                throw new CustomJsonParseException("Si è verificato un errore durante la generazione delle informazioni sul vino, riprovare", e.getCause());
+            } else {
+                throw new RuntimeException("Errore di processing JSON durante la generazione delle informazioni sul vino", e);
+            }
+        }
+
     }
+
+
 
     public WinePairingDTO getWinePairingById(Long id) throws WinePairingNotFoundException {
         Optional<WinePairing> optional = winePairingRepository.findById(id);

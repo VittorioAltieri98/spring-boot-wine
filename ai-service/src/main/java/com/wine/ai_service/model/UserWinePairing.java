@@ -28,11 +28,14 @@ public class UserWinePairing {
     private String wineType;
     private String region;
     private String denomination;
+    @Column(length = 1000)
     private List<String> foodPairings;
     private String serviceTemperature;
+    @Column(length = 1000)
     private String wineDescription;
     private LocalDateTime pairingDate;
 
+    @Column(length = 1000)
     @JdbcTypeCode(SqlTypes.JSON)
     private Map<String, String> foodsNameAndDescriptionOfWhyThePairingIsRecommended;
 

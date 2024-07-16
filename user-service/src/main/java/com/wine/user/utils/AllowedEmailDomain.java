@@ -1,4 +1,4 @@
-package com.wine.auth.utils;
+package com.wine.user.utils;
 
 import lombok.Getter;
 

@@ -1,6 +1,5 @@
 package org.project.wine.gateway_service.security;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,7 @@ public class SecurityConfig {
         return serverHttpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
                         .pathMatchers("/eureka/**").permitAll()
-                        .pathMatchers("/auth/**").permitAll()
+                        .pathMatchers("/user/register").permitAll()
                         .anyExchange().authenticated())
                 .oauth2Login(Customizer.withDefaults())
                 .logout(logout -> logout
@@ -32,13 +31,4 @@ public class SecurityConfig {
                         .oauth2ResourceServer((oauth) -> oauth.jwt(Customizer.withDefaults()))
                 .build();
     }
-
-
-
-//    @Bean
-//    public ServerLogoutSuccessHandler oidcLogoutSuccessHandler() {
-//        OidcClientInitiatedServerLogoutSuccessHandler successHandler = new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
-//        successHandler.setPostLogoutRedirectUri("{baseUrl}");
-//        return successHandler;
-//    }
 }

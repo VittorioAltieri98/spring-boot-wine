@@ -1,11 +1,11 @@
 package com.wine.user.controller;
 
-import com.wine.user.dto.UserInfo;
-import com.wine.user.dto.UserInfoWithID;
-import com.wine.user.dto.UserWinePairingDTO;
+import com.wine.user.dto.*;
 import com.wine.user.exception.UserAlreadyExistsException;
 import com.wine.user.exception.UserNotFoundException;
 import com.wine.user.service.UserService;
+import com.wine.user.service.keycloak.KeycloakAdminClientService;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +24,19 @@ import java.util.List;
 @RequestMapping("/user")
 public class UserController {
 
-   @Autowired
-   private UserService userService;
+   private final UserService userService;
+
+    private final KeycloakAdminClientService keycloakAdminClientService;
+
+    public UserController(UserService userService, KeycloakAdminClientService keycloakAdminClientService) {
+        this.userService = userService;
+        this.keycloakAdminClientService = keycloakAdminClientService;
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest user) throws UserAlreadyExistsException {
+        return new ResponseEntity<>(keycloakAdminClientService.createKeycloakUser(user), HttpStatus.CREATED);
+    }
 
     @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/my-pairings")

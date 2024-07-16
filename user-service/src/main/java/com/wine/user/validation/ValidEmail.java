@@ -1,4 +1,4 @@
-package com.wine.auth.validation;
+package com.wine.user.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
@@ -10,9 +10,9 @@ import java.lang.annotation.Target;
 
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = PasswordValidator.class)
-public @interface ValidPassword {
-    String message() default "Password non valida";
+@Constraint(validatedBy = EmailValidator.class)
+public @interface ValidEmail {
+    String message() default "Email non valida";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

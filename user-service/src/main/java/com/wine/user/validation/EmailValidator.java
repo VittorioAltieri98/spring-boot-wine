@@ -1,6 +1,6 @@
-package com.wine.auth.validation;
+package com.wine.user.validation;
 
-import com.wine.auth.utils.AllowedEmailDomain;
+import com.wine.user.utils.AllowedEmailDomain;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

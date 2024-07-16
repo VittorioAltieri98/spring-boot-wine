@@ -1,4 +1,4 @@
-package com.wine.auth.validation;
+package com.wine.user.validation;
 
 
 import jakarta.validation.ConstraintValidator;

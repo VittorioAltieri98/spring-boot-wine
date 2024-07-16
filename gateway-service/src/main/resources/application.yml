@@ -24,11 +24,6 @@ spring:
           predicates:
             - Path=/ai/**
 
-        - id: auth-service
-          uri: lb://auth-service
-          predicates:
-            - Path=/auth/**
-
         - id: user-service
           uri: lb://user-service
           predicates:
@@ -48,9 +43,9 @@ spring:
           microservice-auth:
             provider: keycloak
             clientId: microservice-auth
-            clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            #clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
             redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
-            #clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
+            clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
             authorizationGrantType: authorization_code
             scope: openid
 

@@ -1,4 +1,4 @@
-package com.wine.auth.dto;
+package com.wine.user.dto;
 
 import lombok.Builder;
 import lombok.Data;

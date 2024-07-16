@@ -6,6 +6,7 @@ import com.wine.user.dto.UserWinePairingDTO;
 import com.wine.user.exception.UserAlreadyExistsException;
 import com.wine.user.exception.UserNotFoundException;
 import com.wine.user.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequestMapping("/user")
 public class UserController {
 
@@ -41,6 +43,8 @@ public class UserController {
     @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("my-profile")
     public ResponseEntity<UserInfo> getUserProfile(@AuthenticationPrincipal Jwt jwt) {
+        //System.out.println(jwt.getTokenValue());
+        log.info("Token JWT: {}", jwt.getTokenValue());
         return new ResponseEntity<>(userService.getUserProfileInfo(jwt.getSubject()), HttpStatus.OK);
     }
 

@@ -10,15 +10,13 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
-import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-//    @Autowired
-//    private ReactiveClientRegistrationRepository clientRegistrationRepository;
+    @Autowired
+    private ReactiveClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
@@ -27,9 +25,15 @@ public class SecurityConfig {
                         .pathMatchers("/eureka/**").permitAll()
                         .pathMatchers("/auth/**").permitAll()
                         .anyExchange().authenticated())
-                .oauth2ResourceServer((oauth) -> oauth.jwt(Customizer.withDefaults()))
+                .oauth2Login(Customizer.withDefaults())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessHandler(new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository)))
+                        .oauth2ResourceServer((oauth) -> oauth.jwt(Customizer.withDefaults()))
                 .build();
     }
+
+
 
 //    @Bean
 //    public ServerLogoutSuccessHandler oidcLogoutSuccessHandler() {

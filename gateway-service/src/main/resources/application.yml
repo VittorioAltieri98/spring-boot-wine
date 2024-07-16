@@ -39,6 +39,7 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8081/realms/springboot-microservice-realm
       client:
         provider:
           keycloak:
@@ -48,6 +49,7 @@ spring:
             provider: keycloak
             clientId: microservice-auth
             clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
+            redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
             #clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
             authorizationGrantType: authorization_code
             scope: openid

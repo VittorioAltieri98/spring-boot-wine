@@ -29,16 +29,16 @@ public class AuthController {
         return new ResponseEntity<>(keycloakAdminClientService.createKeycloakUser(user), HttpStatus.CREATED);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginRequest loginRequest) throws InvalidUserCredentialsException {
-        AccessTokenResponse response = keycloakAdminClientService.getAccessToken(loginRequest.getUsername(), loginRequest.getPassword());
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<AccessTokenResponse> login(@RequestBody LoginRequest loginRequest) throws InvalidUserCredentialsException {
+//        AccessTokenResponse response = keycloakAdminClientService.getAccessToken(loginRequest.getUsername(), loginRequest.getPassword());
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
 
-    @PostMapping("/logout")
-    public ResponseEntity<LogoutResponse> logout(@RequestBody TokenRequest request) {
-        return keycloakAdminClientService.logout(request);
-    }
+//    @PostMapping("/logout")
+//    public ResponseEntity<LogoutResponse> logout(@RequestBody TokenRequest request) {
+//        return keycloakAdminClientService.logout(request);
+//    }
 
     @PostMapping("/introspect")
     public ResponseEntity<IntrospectResponse> introspect(@RequestBody TokenRequest token) {

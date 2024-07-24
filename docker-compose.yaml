@@ -1,18 +1,30 @@
 version: "3.8"
 services:
-  postgres-wine:
+  postgres-wine-query:
     image: 'postgres:latest'
-    container_name: postgres-wine
+    container_name: postgres-wine-query
     environment:
-      POSTGRES_DB: wine-service
+      POSTGRES_DB: wine-query-service
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5432"
+      - "5435:5432"
     volumes:
-      - wine-data:/var/lib/postgresql/data
+      - wine-query-data:/var/lib/postgresql/data
     restart: always
 
+  postgres-wine-command:
+    image: 'postgres:latest'
+    container_name: postgres-wine-command
+    environment:
+      POSTGRES_DB: wine-command-service
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - wine-command-data:/var/lib/postgresql/data
+    restart: always
 
   postgres-ai-service:
     image: 'postgres:latest'
@@ -27,6 +39,63 @@ services:
       - ai-service-data:/var/lib/postgresql/data
     restart: always
 
+  zookeeper:
+    image: 'confluentinc/cp-zookeeper:latest'
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "22181:2181"
+
+  kafka:
+    image: 'confluentinc/cp-kafka:latest'
+    container_name: ms_kafka
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+
+  keycloak-db:
+    container_name: keycloak-db
+    image: 'postgres:latest'
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: keycloak
+    volumes:
+      - postgres_keycloak_data:/var/lib/postgresql/data
+
+  keycloak:
+    container_name: keycloak
+    image: 'quay.io/keycloak/keycloak:latest'
+    command:
+      - "start-dev"
+      - "--import-realm"
+      - "-Dkeycloak.profile.feature.upload_scripts=enabled"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-db
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: keycloak
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./imports/realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak_data:/opt/keycloak/data
+    depends_on:
+      - keycloak-db
 
   pgadmin:
     image: dpage/pgadmin4
@@ -40,12 +109,16 @@ services:
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     depends_on:
-      - postgres-wine
+      - postgres-wine-query
+      - postgres-wine-command
       - postgres-ai-service
 
 volumes:
-  wine-data:
+  wine-query-data:
+  wine-command-data:
   ai-service-data:
+  postgres_keycloak_data:
+  keycloak_data:
   pgadmin-data:
 
 

@@ -45,7 +45,8 @@ spring:
             clientId: microservice-auth
             #clientSecret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
             redirect-uri: '{baseUrl}/login/oauth2/code/{registrationId}'
-            clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
+            #clientSecret: YJpPuRsd7owUtCg9YvrqnfEGFSLdCwhG
+            clientSecret: Wi6Sg371ZZdReLMEM2I0XaPUqoGNLEzz
             authorizationGrantType: authorization_code
             scope: openid
 

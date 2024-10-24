@@ -1,4 +1,4 @@
-package com.wine.user.config;
+package com.wine.auth.config;
 
 import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
@@ -35,4 +35,18 @@ public class KeycloakProvider {
                 .build();
 
     }
+
+
+
+//
+//    public JsonNode refreshToken(String refreshToken) throws UnirestException {
+//        String url = serverURL + "/realms/" + realm + "/protocol/openid-connect/token";
+//        return Unirest.post(url)
+//                .header("Content-Type", "application/x-www-form-urlencoded")
+//                .field("client_id", clientID)
+//                .field("client_secret", clientSecret)
+//                .field("refresh_token", refreshToken)
+//                .field("grant_type", "refresh_token")
+//                .asJson().getBody();
+//    }
 }

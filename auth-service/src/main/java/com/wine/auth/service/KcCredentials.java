@@ -1,14 +1,11 @@
-package com.wine.user.config;
+package com.wine.auth.service;
 
-import org.keycloak.OAuth2Constants;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Service;
 
-@Configuration
-public class KeycloakProvider {
+@Service
+public class KcCredentials {
 
     @Value("${keycloak.auth-server-url}")
     public String serverURL;
@@ -22,17 +19,13 @@ public class KeycloakProvider {
     @Value("${keycloak.credentials.secret}")
     public String clientSecret;
 
-
-    @Bean
-    public Keycloak keycloak() {
-
+    public KeycloakBuilder newKeycloakBuilderWithPasswordCredentials(String username, String password) {
         return KeycloakBuilder.builder()
                 .realm(realm)
                 .serverUrl(serverURL)
                 .clientId(clientID)
                 .clientSecret(clientSecret)
-                .grantType(OAuth2Constants.CLIENT_CREDENTIALS)
-                .build();
-
+                .username(username)
+                .password(password);
     }
 }

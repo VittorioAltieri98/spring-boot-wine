@@ -1,14 +1,12 @@
 package com.wine.user.controller;
 
-import com.wine.user.dto.*;
+import com.wine.user.dto.UserInfo;
+import com.wine.user.dto.UserInfoWithID;
+import com.wine.user.dto.UserWinePairingDTO;
 import com.wine.user.exception.UserAlreadyExistsException;
 import com.wine.user.exception.UserNotFoundException;
 import com.wine.user.service.UserService;
-import com.wine.user.service.keycloak.KeycloakAdminClientService;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +14,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -26,16 +23,8 @@ public class UserController {
 
    private final UserService userService;
 
-    private final KeycloakAdminClientService keycloakAdminClientService;
-
-    public UserController(UserService userService, KeycloakAdminClientService keycloakAdminClientService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.keycloakAdminClientService = keycloakAdminClientService;
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<CreateUserResponse> createUser(@RequestBody @Valid CreateUserRequest user) throws UserAlreadyExistsException {
-        return new ResponseEntity<>(keycloakAdminClientService.createKeycloakUser(user), HttpStatus.CREATED);
     }
 
     @PreAuthorize("hasAnyRole('user', 'admin')")

@@ -127,6 +127,10 @@
             <artifactId>keycloak-admin-client</artifactId>
             <version>25.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

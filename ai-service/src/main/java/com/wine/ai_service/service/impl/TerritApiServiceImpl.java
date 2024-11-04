@@ -13,6 +13,7 @@ import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.BeanOutputParser;
 import org.springframework.ai.vertexai.gemini.VertexAiGeminiChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +37,16 @@ public class TerritApiServiceImpl implements TerritApiService{
 	private final ObjectMapper objectMapper;
 	private final VertexAiGeminiChatClient vertexAiGeminiChatClient;
 
+	@Value("${api.regions.url}")
+	private String url;
+
+	@Value("${api.key}")
+	private String key;
+
+	@Value("${api.key.value}")
+	private String key_value;
+
+
 	@Autowired
 	public TerritApiServiceImpl(RestTemplate restTemplate, VertexAiGeminiChatClient vertexAiGeminiChatClient) {
 		this.restTemplate = restTemplate;
@@ -44,10 +55,9 @@ public class TerritApiServiceImpl implements TerritApiService{
 	}
 
 	public List<String> getRegions() {
-		String url = "https://api.territ.it/regioni";
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("x-api-key", "d859dca139d935a530b95fece2ffd1ac5df8bdd4dc40a7ea077248f9f44a9869");
+		headers.set(key, key_value);
 
 		HttpEntity<String> entity = new HttpEntity<>(headers);
 
@@ -64,7 +74,6 @@ public class TerritApiServiceImpl implements TerritApiService{
 
 		if (responseMap != null && responseMap.containsKey("data")) {
 			List<Map<String, String>> data = (List<Map<String, String>>) responseMap.get("data");
-
 
 			return data.stream()
 					.map(regione -> regione.get("denominazione"))

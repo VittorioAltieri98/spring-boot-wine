@@ -21,7 +21,7 @@ public class SecurityConfig {
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity serverHttpSecurity) {
         return serverHttpSecurity.csrf(csrf -> csrf.disable())
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers("/eureka/**").permitAll()
+                        .pathMatchers("/actuator/health").permitAll()
                         .pathMatchers("/auth/**").permitAll()
                         .anyExchange().authenticated())
                 .oauth2Login(Customizer.withDefaults())

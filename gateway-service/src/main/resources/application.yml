@@ -6,6 +6,9 @@ spring:
     name: gateway-service
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
       default-filters:
         - TokenRelay=
       routes:
@@ -33,6 +36,12 @@ spring:
           uri: lb://auth-service
           predicates:
             - Path=/auth/**
+    consul:
+      discovery:
+        hostname: localhost
+        enabled: true
+        register: true
+        health-check-path: /actuator/health
 
   security:
     oauth2:
@@ -55,23 +64,13 @@ spring:
             authorizationGrantType: authorization_code
             scope: openid
 
-  #security:
-   # oauth2:
-    #  resourceserver:
-     #   jwt:
-      #    issuer-uri: http://localhost:8081/realms/springboot-microservice-realm
-
-  #security:
-    #oauth2:
-      #resourceserver:
-        #opaquetoken:
-          #client-id: microservice-auth
-          #client-secret: CWoQ7fBBHW64GCe711uNWLqWZ95psbHY
-          #introspection-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/token/introspect
-
-eureka:
-  client:
-    service-url:
-      defaultZone : http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true

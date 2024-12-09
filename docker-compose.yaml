@@ -1,4 +1,4 @@
-version: "3.8"
+
 services:
   postgres-wine-query:
     image: 'postgres:latest'
@@ -12,6 +12,19 @@ services:
     volumes:
       - wine-query-data:/var/lib/postgresql/data
     restart: always
+
+  consul:
+    image: bitnami/consul:latest
+    container_name: consul
+    ports:
+      - "8500:8500"   # Expose the Consul UI and API
+      - "8600:8600/udp" # DNS interface
+    environment:
+      - CONSUL_CLIENT_LAN_ADDRESS=0.0.0.0
+    volumes:
+      - consul-data:/bitnami
+    networks:
+      - consul-network
 
   postgres-wine-command:
     image: 'postgres:latest'
@@ -118,8 +131,11 @@ volumes:
   postgres_keycloak_data:
   keycloak_data:
   pgadmin-data:
+  consul-data:
 
-
+networks:
+  consul-network:
+    driver: bridge
 
 
 

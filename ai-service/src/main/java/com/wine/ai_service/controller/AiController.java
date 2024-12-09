@@ -123,7 +123,7 @@ public class AiController {
 
     @PreAuthorize("hasAnyRole('user', 'admin')")
     @GetMapping("/typical-dishes/{region}")
-    public ResponseEntity<List<String>> getTypicalDishes(@PathVariable String region) {
+    public ResponseEntity<String> getTypicalDishes(@PathVariable String region) {
         return new ResponseEntity<>(territApiService.getTypicalDishes(region), OK);
     }
 

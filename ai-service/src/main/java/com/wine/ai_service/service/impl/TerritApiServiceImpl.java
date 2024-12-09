@@ -1,12 +1,8 @@
 package com.wine.ai_service.service.impl;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.wine.ai_service.exception.CustomJsonParseException;
-import com.wine.ai_service.exception.QuotaExceededException;
+import com.wine.ai_service.dto.WineInfo;
 import com.wine.ai_service.service.TerritApiService;
-import io.grpc.StatusRuntimeException;
 import org.springframework.ai.chat.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -22,12 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
 
 @Service
@@ -83,26 +76,17 @@ public class TerritApiServiceImpl implements TerritApiService{
 		}
 	}
 
-	public List<String> getTypicalDishes(String region) {
+	public String getTypicalDishes(String region) {
 
 		String userMessage = """
-            Generami una lista di nomi di piatti tipici italiani della regione {region}, separati da una virgola
+            Generami solo una lista con i nomi dei piatti tipici italiani della regione {region}, uno per riga,
+             ma solo se il nome della regione esiste, altrimenti restituisci un messaggio che chiede di inserire una regione esistente
             """;
 
 		PromptTemplate promptTemplate = new PromptTemplate(userMessage, Map.of("region", region));
 		Prompt prompt = promptTemplate.create();
 
-		try {
-			Generation generation = vertexAiGeminiChatClient.call(prompt).getResult();
-			String output = generation.getOutput().getContent();
-
-			return stream(output.split(","))
-					.map(String::trim)
-					.collect(toList());
-		} catch (StatusRuntimeException e) {
-			throw new QuotaExceededException("Quota superata, riprovare tra qualche secondo", e);
-		} catch (RuntimeException e) {
-			throw new RuntimeException("Errore durante la generazione dei piatti tipici", e);
-		}
+		Generation generation = vertexAiGeminiChatClient.call(prompt).getResult();
+		return generation.getOutput().getContent();
 	}
 }

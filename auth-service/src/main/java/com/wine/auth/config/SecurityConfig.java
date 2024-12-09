@@ -16,11 +16,10 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 @EnableWebSecurity
 public class SecurityConfig {
 
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/auth/logout").authenticated()
                 .requestMatchers("/auth/**").permitAll()
                 .anyRequest().authenticated());
@@ -34,7 +33,6 @@ public class SecurityConfig {
 //                .deleteCookies("JSESSIONID"));
         return http.build();
     }
-
 
 //    @Bean
 //    public LogoutSuccessHandler oidcLogoutSuccessHandler() {

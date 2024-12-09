@@ -11,6 +11,7 @@ import com.wine.microservice.mapper.WineMapper;
 import com.wine.microservice.model.Wine;
 import com.wine.microservice.repository.WineRepository;
 import com.wine.microservice.service.WineService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.kafka.annotation.KafkaListener;

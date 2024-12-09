@@ -14,3 +14,11 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: http://localhost:8081/realms/springboot-microservice-realm/protocol/openid-connect/certs
+
+  cloud:
+    consul:
+      discovery:
+        hostname: localhost
+        enabled: true
+        register: true
+        health-check-path: /actuator/health
